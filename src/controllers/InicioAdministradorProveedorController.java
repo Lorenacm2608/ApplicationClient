@@ -10,13 +10,13 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
@@ -24,7 +24,10 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TablePosition;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
+import javafx.scene.control.cell.ChoiceBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.Image;
@@ -34,10 +37,10 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import javax.persistence.EntityManager;
 import modelo.Administrador;
 import modelo.Proveedor;
 import modelo.TipoProducto;
-import static modelo.TipoProducto.ROPA;
 import modelo.Usuario;
 
 /**
@@ -63,8 +66,6 @@ public class InicioAdministradorProveedorController {
     @FXML
     private Button btnBorrarProveedor;
     @FXML
-    private Button btnActualizarProveedor;
-    @FXML
     private MenuBar menuBar;
     @FXML
     private Menu menuPerfil;
@@ -83,7 +84,7 @@ public class InicioAdministradorProveedorController {
     @FXML
     private TableColumn<Proveedor, String> tcNombre;
     @FXML
-    private TableColumn<Proveedor, TipoProducto> tcTipo;
+    private TableColumn<TipoProducto, TipoProducto> tcTipo;
     @FXML
     private TableColumn<Proveedor, String> tcEmpresa;
     @FXML
@@ -95,9 +96,14 @@ public class InicioAdministradorProveedorController {
     @FXML
     private TableColumn<Administrador, Long> tcAdmin;
 
-    private final List<Proveedor> proveedores = new ArrayList<>();
+    private EntityManager entityManager;
+    private List<Proveedor> proveedores = new ArrayList<>();
     private Usuario usuario;
     private Proveedor proveedor;
+    @FXML
+    private TextField tfBuscar;
+    @FXML
+    private Button btnBuscar;
 
     /**
      * Recibe el escenario
@@ -123,21 +129,24 @@ public class InicioAdministradorProveedorController {
      * @param root, clase parent
      */
     public void initStage(Parent root) {
+        //Indicamos las columnas que debe tener la tabla y como deben ser
         iniciarColumnasTabla();
         //Configuración de la ventana
         LOG.log(Level.INFO, "Ventana Inicio de Administrador (Proveedor)");
-
         Scene scene = new Scene(root);
-        //((HBox) scene.getRoot()).getChildren().addAll(menuBar);
         stage.setScene(scene);
         stage.setTitle("Administrador");
         stage.setResizable(false);
+        //Indicamos las imagenes de los botones
         imagenBotones();
+        //Indicamos el metodo que se encargara de la apariencia del stage cuando se cierre la ventana
         stage.setOnCloseRequest(this::handleWindowClose);
+        //Indicamos el metodo que se encargara de la apariencia del stage cuando se inicie la ventana
         stage.setOnShowing(this::handleWindowShowing);
+        //Indicamos las acciones de cada boton 
         btnAltaProveedor.setOnAction(this::btnAltaProveedorClick);
         btnBorrarProveedor.setOnAction(this::borrarProveedor);
-        btnActualizarProveedor.setOnAction(this::actualizarProveedor);
+        //Mostramos el stage
         stage.show();
 
     }
@@ -171,15 +180,21 @@ public class InicioAdministradorProveedorController {
      */
     private void handleWindowShowing(WindowEvent event) {
         LOG.log(Level.INFO, "Beginning InicioAdministradorProveedorController::handleWindowShowing");
-        btnActualizarProveedor.setDisable(true);
+        //Indicamos que el boton borrarProveedor tiene que estar desactivado
         btnBorrarProveedor.setDisable(true);
+    }
 
+    private int incrementarID() {
+        int proveedorID = tbProveedor.getSelectionModel().getSelectedIndex();
+        proveedorID++;
+        return proveedorID;
     }
 
     /**
      * Inicializa la tabla de proveedores
      */
     private void iniciarColumnasTabla() {
+        int id = incrementarID();
         seleccionarProveedor();
         //Hacemos que la tabla sea editable
         tbProveedor.setEditable(true);
@@ -189,12 +204,36 @@ public class InicioAdministradorProveedorController {
         //Definimos las celdas de la tabla, incluyendo que algunas pueden ser editables
         //Id del proveedor
         tcId.setCellValueFactory(new PropertyValueFactory<>("idProveedor"));
+        //tcId.setEditable(false);
+        //tcId.setId(Long.valueOf(id));
         //Nombre del proveedor
         tcNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
+        tcNombre.setCellFactory(TextFieldTableCell.forTableColumn());
+        tcNombre.setOnEditCommit((TableColumn.CellEditEvent<Proveedor, String> data) -> {
+            LOG.log(Level.INFO, "Nuevo Nombre: {0}", data.getNewValue());
+            LOG.log(Level.INFO, "Antiguo Nombre: {0}", data.getOldValue());
+            //Devuelve el dato de la celda
+            Proveedor p = data.getRowValue();
+            //Añadimos el nuevo valor a la celda
+            p.setNombre(data.getNewValue());
+        });
         //Tipo de producto 
         tcTipo.setCellValueFactory(new PropertyValueFactory<>("tipo"));
+        tcTipo.setCellFactory(ChoiceBoxTableCell.
+                forTableColumn(TipoProducto.ROPA, TipoProducto.ZAPATILLAS));
+        tcTipo.addEventHandler(TableColumn.<Proveedor, TipoProducto>editCommitEvent(),
+                event -> actualizarTipoProducto(event));
         //Empresa del proveedor
         tcEmpresa.setCellValueFactory(new PropertyValueFactory<>("empresa"));
+        tcEmpresa.setCellFactory(TextFieldTableCell.forTableColumn());
+        tcEmpresa.setOnEditCommit((TableColumn.CellEditEvent<Proveedor, String> data) -> {
+            LOG.log(Level.INFO, "Nuevo Empresa: {0}", data.getNewValue());
+            LOG.log(Level.INFO, "Antigua Empresa: {0}", data.getOldValue());
+            //Devuelve el dato de la celda
+            Proveedor p = data.getRowValue();
+            //Añadimos el nuevo valor a la celda
+            p.setEmpresa(data.getNewValue());
+        });
         //Email del proveedor
         tcEmail.setCellValueFactory(new PropertyValueFactory<>("email"));
         //Indicamos que la celda puede cambiar a un TextField
@@ -254,21 +293,19 @@ public class InicioAdministradorProveedorController {
         tbProveedor.getSelectionModel().selectedItemProperty().addListener(
                 (observable, oldValue, newValue) -> {
                     if (proveedor != null) {
-                        btnActualizarProveedor.setDisable(true);
                         btnBorrarProveedor.setDisable(true);
                     } else {
-                        btnActualizarProveedor.setDisable(false);
                         btnBorrarProveedor.setDisable(false);
                     }
                 });
     }
-    //CONFIGURACIÓN DE LOS DATOS 
 
+    //CONFIGURACIÓN DE LOS DATOS 
     /**
      *
      */
     private void datosTabla() {
-        //
+        /*
         Proveedor proveedor = new Proveedor();
         Administrador administrador = new Administrador();
         proveedor.setIdProveedor(Long.valueOf(1));
@@ -281,7 +318,18 @@ public class InicioAdministradorProveedorController {
         proveedor.setAdministrador(administrador);
 
         ObservableList<Proveedor> datos = FXCollections.observableArrayList(proveedor);
-        tbProveedor.setItems(datos);
+        tbProveedor.setItems(datos);*/
+        
+        //Query queryPersonaFindAll = entityManager.createNamedQuery("Proveedor.find");
+        //proveedores = queryPersonaFindAll.getResultList();
+        tbProveedor.setItems(FXCollections.observableArrayList(proveedores));
+        //tbProveedor.getSelectionModel().selectedIndexProperty().addListener(this::mostrarDatosTabla);
+
+    }
+    
+
+    public void setEntityManager(EntityManager entityManager) {
+        this.entityManager = entityManager;
     }
 
     /* private List<Proveedor> getProveedores() {
@@ -315,18 +363,17 @@ public class InicioAdministradorProveedorController {
      * @param event ActionEvent
      */
     private void btnAltaProveedorClick(ActionEvent event) {
-        LOG.log(Level.INFO, "Ventana Alta Proveedor (SignUp_Proveedor)");
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/SignUpProveedorView.fxml"));
+        //Posicion actual
+        TablePosition pos = tbProveedor.getFocusModel().getFocusedCell();
+        //
+        tbProveedor.getSelectionModel().clearSelection();
 
-            Parent root = (Parent) loader.load();
+        Proveedor nuevoProveedor = new Proveedor();
+        tbProveedor.getItems().add(nuevoProveedor);
 
-            /*SignUpProveedorController controller = ((SignUpProveedorController) loader.getController());
-            controller.initStage(root);*/
-            stage.hide();
-        } catch (IOException e) {
-            LOG.log(Level.SEVERE, "Se ha producido un error de E/S");
-        }
+        int row = tbProveedor.getItems().size() - 1;
+        tbProveedor.getSelectionModel().select(row, pos.getTableColumn());
+        tbProveedor.scrollTo(nuevoProveedor);
     }
 
     /**
@@ -335,29 +382,21 @@ public class InicioAdministradorProveedorController {
      * @param event
      */
     private void borrarProveedor(ActionEvent event) {
-        LOG.log(Level.INFO, "Se ha borrado un proveedor");
-        tbProveedor.getItems().removeAll(tbProveedor.getSelectionModel().getSelectedItem());
-    }
+        //Capturamos el indice del proveedor seleccionado y borro su item asociado de la tabla
+        int proveedorSeleccionado = tbProveedor.getSelectionModel().getSelectedIndex();
+        if (proveedorSeleccionado >= 0) {
+            //Borramos el proveedor
+            LOG.log(Level.INFO, "Se ha borrado un proveedor");
+            tbProveedor.getItems().remove(proveedorSeleccionado);
 
-    /**
-     *
-     * @param event
-     */
-    private void actualizarProveedor(ActionEvent event) {
-        LOG.log(Level.INFO, "Confirmación de guardado de cambios");
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setHeaderText(null);
-
-        alert.setTitle("Administrador");
-        alert.setContentText("¿Estas seguro de guardar los cambios?");
-        Optional<ButtonType> respuesta = alert.showAndWait();
-
-        if (respuesta.get() == ButtonType.OK) {
-            LOG.log(Level.INFO, "Has pulsado el boton Aceptar");
-            event.consume();
         } else {
-            LOG.log(Level.INFO, "Has pulsado el boton Cancelar");
-            event.consume();
+            //En el caso de no seleccionar un proveedor. Saldrá un alerta
+            Alert alerta = new Alert(AlertType.WARNING);
+            alerta.setTitle("Atención");
+            alerta.setHeaderText("Proveedor no seleccionado");
+            alerta.setContentText("Por favor, selecciona un proveedor de la tabla");
+            alerta.showAndWait();
+
         }
     }
 
@@ -375,7 +414,7 @@ public class InicioAdministradorProveedorController {
         alert.setTitle("Información del Administrador");
         alert.setHeaderText("Usuario: Administrador");
 
-        SimpleDateFormat sdf = new SimpleDateFormat("hh: mm dd-MMM-aaaa");
+        SimpleDateFormat sdf = new SimpleDateFormat("hh:mm dd-MMM-aaaa");
         String fechaComoCadena = sdf.format(new Date());
         alert.setContentText(fechaComoCadena);
         alert.showAndWait();
@@ -433,18 +472,21 @@ public class InicioAdministradorProveedorController {
         //Creamos un objeto y en él guardaremos la ruta donde se encuentra las imagenes para los botones
         URL linkAlta = getClass().getResource("/img/usuario.png");
         URL linkBorrar = getClass().getResource("/img/eliminar.png");
-        URL linkActualizar = getClass().getResource("/img/refrescar.png");
 
         //Instanciamos una imagen pasándole la ruta de las imagenes y las medidas del boton 
         Image imageAlta = new Image(linkAlta.toString(), 32, 32, false, true);
         Image imageBorrar = new Image(linkBorrar.toString(), 32, 32, false, true);
-        Image imageActualizar = new Image(linkActualizar.toString(), 32, 32, false, true);
 
         //Añadimos la imagen a los botones que deban llevar icono
         btnAltaProveedor.setGraphic(new ImageView(imageAlta));
         btnBorrarProveedor.setGraphic(new ImageView(imageBorrar));
-        btnActualizarProveedor.setGraphic(new ImageView(imageActualizar));
 
+    }
+
+    private void actualizarTipoProducto(TableColumn.CellEditEvent<Proveedor, TipoProducto> event) {
+        Proveedor proveedor = event.getRowValue();
+        TipoProducto tipo = event.getNewValue();
+        proveedor.setTipo(event.getNewValue());
     }
 
 }

@@ -142,6 +142,13 @@ public class ListaDeProductosController {
      * @param root, clase parent
      */
     public void initStage(Parent root) {
+        LOG.log(Level.INFO, "Ventana Lista de Productos (Cliente)");
+        Scene scene = new Scene(root);
+        stage.setScene(scene);
+        stage.setTitle("Lista de productos");
+        stage.setResizable(false);
+
+        stage.show();
         try {
             int columna = 0;
             int fila = 1;
@@ -171,13 +178,6 @@ public class ListaDeProductosController {
 
             }
 
-            LOG.log(Level.INFO, "Ventana Lista de Productos (Cliente)");
-            Scene scene = new Scene(root);
-            stage.setScene(scene);
-            stage.setTitle("Lista de productos");
-            stage.setResizable(false);
-
-            stage.show();
         } catch (IOException ex) {
             LOG.log(Level.SEVERE, "Se ha producido un error");
         }

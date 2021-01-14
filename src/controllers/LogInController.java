@@ -22,6 +22,8 @@ import javafx.stage.WindowEvent;
 import factory.UsuarioFactory;
 import java.util.Optional;
 import javafx.scene.control.ButtonType;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import manager.UsuarioManager;
 import modelo.Usuario;
 import seguridad.Seguridad;
@@ -32,6 +34,8 @@ import validar.Validar;
  *
  * @author Moroni Collazos Fiestas
  */
+
+
 public class LogInController {
 
     private static final Logger LOG = Logger.getLogger("controllers.LogInController");
@@ -48,10 +52,8 @@ public class LogInController {
     @FXML
     private Hyperlink hlRegistrarse;
     @FXML
-    private Label lblerrorusuario;
-    @FXML
-    private Label lblErrorContrasena;
-
+    private ImageView ivLogo;
+    
     private Stage stage = new Stage();
     private Usuario usuario;
 
@@ -83,10 +85,12 @@ public class LogInController {
      * @param root, clase parent
      */
     public void initStage(Parent root) {
+        //Añadimos la imagen del logo de la aplicacion
+        ivLogo.setImage(new Image("/img/logo.png"));
         LOG.log(Level.INFO, "Ventana LOGIN");
         Scene scene = new Scene(root);
         stage.setScene(scene);
-        stage.setTitle("Inicio");
+        stage.setTitle("¡Bienvenido a Flyshoes!");
         stage.setResizable(false);
         stage.setOnCloseRequest(this::handleWindowClose);
         stage.setOnShowing(this::handleWindowShowing);
@@ -128,7 +132,6 @@ public class LogInController {
      */
     private void handleWindowShowing(WindowEvent event) {
         btnIniciar.setDisable(true);
-        lblerrorusuario.setVisible(false);
         LOG.log(Level.INFO, "Beginning LoginController::handleWindowShowing");
 
     }
@@ -144,10 +147,8 @@ public class LogInController {
         Validar.addTextLimiter(txtUsuario, treinta);
         Validar.addTextLimiterPass(txtContrasena, treinta);
         if (!txtUsuario.getText().trim().equals("") && !txtContrasena.getText().trim().equals("")) {
-            boolean isValidUsuario = Validar.isValid(txtUsuario, lblerrorusuario, "Usuario invalido", "");
-            lblerrorusuario.setVisible(true);
+            boolean isValidUsuario = Validar.isValid(txtUsuario);
 
-          //  lblErrorContrasena.setVisible(false);
             txtContrasena.setStyle("-fx-focus-color: #039ED3; -fx-faint-focus-color: #039ED322;");
 
             if (isValidUsuario) {
@@ -178,7 +179,7 @@ public class LogInController {
         Alert alert;
         try {
             //usuario = usuarioM.ClusuarioByLogin(Usuario.class, usuario.getLogin(), Seguridad.encriptarContrasenia(usuario.getPassword()));
-            UsuarioRESTClient usuarioR=(UsuarioRESTClient) usuarioM;
+            UsuarioRESTClient usuarioR = (UsuarioRESTClient) usuarioM;
             usuario = usuarioR.usuarioByLogin(Usuario.class, usuario.getLogin(), Seguridad.encriptarContrasenia(usuario.getPassword()));
             System.out.println(usuario.getLastAccess());
             FXMLLoader loader = null;

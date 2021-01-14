@@ -29,17 +29,12 @@
          <children>
             <Button fx:id="btnAltaProveedor" mnemonicParsing="false" prefHeight="31.0" prefWidth="165.0" text="Nuevo ">
                <VBox.margin>
-                  <Insets left="35.0" top="150.0" />
+                  <Insets left="35.0" top="190.0" />
                </VBox.margin>
             </Button>
             <Button fx:id="btnBorrarProveedor" mnemonicParsing="false" prefHeight="31.0" prefWidth="165.0" text="Borrar ">
                <VBox.margin>
-                  <Insets left="35.0" top="150.0" />
-               </VBox.margin>
-            </Button>
-            <Button fx:id="btnActualizarProveedor" mnemonicParsing="false" prefHeight="31.0" prefWidth="165.0" text="Actualizar ">
-               <VBox.margin>
-                  <Insets left="35.0" top="150.0" />
+                  <Insets left="35.0" top="200.0" />
                </VBox.margin>
             </Button>
          </children>
@@ -75,5 +70,7 @@
             </MenuBar>
          </children>
       </HBox>
+      <TextField fx:id="tfBuscar" layoutX="31.0" layoutY="81.0" prefHeight="31.0" prefWidth="165.0" promptText="Buscar proveedor" />
+      <Button fx:id="btnBuscar" layoutX="209.0" layoutY="81.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="84.0" text="Buscar" />
    </children>
 </Pane>
