@@ -38,6 +38,8 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javax.persistence.EntityManager;
+import manager.AdministradorManager;
+import manager.ProveedorManager;
 import modelo.Administrador;
 import modelo.Proveedor;
 import modelo.TipoProducto;
@@ -96,10 +98,11 @@ public class InicioAdministradorProveedorController {
     @FXML
     private TableColumn<Administrador, Long> tcAdmin;
 
-    private EntityManager entityManager;
+    //private EntityManager entityManager;
     private List<Proveedor> proveedores = new ArrayList<>();
-    private Usuario usuario;
+    //private Usuario usuario;
     private Proveedor proveedor;
+    private  AdministradorManager administradorManager;
     @FXML
     private TextField tfBuscar;
     @FXML
@@ -322,15 +325,15 @@ public class InicioAdministradorProveedorController {
         
         //Query queryPersonaFindAll = entityManager.createNamedQuery("Proveedor.find");
         //proveedores = queryPersonaFindAll.getResultList();
-        tbProveedor.setItems(FXCollections.observableArrayList(proveedores));
+        //tbProveedor.setItems(FXCollections.observableArrayList(administradorManager.getProveedores());
         //tbProveedor.getSelectionModel().selectedIndexProperty().addListener(this::mostrarDatosTabla);
 
     }
     
 
-    public void setEntityManager(EntityManager entityManager) {
+  /*  public void setEntityManager(EntityManager entityManager) {
         this.entityManager = entityManager;
-    }
+    }*/
 
     /* private List<Proveedor> getProveedores() {
         Proveedor proveedor;
@@ -412,7 +415,7 @@ public class InicioAdministradorProveedorController {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setHeaderText(null);
         alert.setTitle("Información del Administrador");
-        alert.setHeaderText("Usuario: Administrador");
+        alert.setHeaderText("Usuario: ");
 
         SimpleDateFormat sdf = new SimpleDateFormat("hh:mm dd-MMM-aaaa");
         String fechaComoCadena = sdf.format(new Date());
