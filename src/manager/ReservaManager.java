@@ -5,9 +5,11 @@
  */
 package manager;
 
+import java.util.List;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.GenericType;
+import modelo.Reserva;
 
 /**
  *
@@ -27,8 +29,10 @@ public interface ReservaManager {
 
     public <T> T findReservasRealizadas(Class<T> responseType) throws ClientErrorException;
     
-    public <T> T findReservas(GenericType<T> responseType) throws ClientErrorException;
-
+    public List <Reserva> findReservas(GenericType responseType) throws ClientErrorException;
+    /*
+    public <T> T Eliminar(Class<T> responseType, String id) throws ClientErrorException;
+*/
     public void remove(String id) throws ClientErrorException;
 
     public void close();

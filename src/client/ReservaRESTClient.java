@@ -5,12 +5,15 @@
  */
 package client;
 
+import java.util.List;
 import java.util.ResourceBundle;
+import static javafx.scene.input.KeyCode.T;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.GenericType;
 import manager.ReservaManager;
+import modelo.Reserva;
 
 /**
  * Jersey REST client generated for REST resource:ReservaFacadeREST
@@ -53,11 +56,18 @@ public class ReservaRESTClient implements ReservaManager {
         return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
     }
     //igual quitar las Ts y poner List <Reservas>   y luego en el generic quitar la <T> y tambien el return, return list<Reservas>
-    public <T> T findReservas(GenericType<T> responseType) throws ClientErrorException {
+    public List <Reserva> findReservas(GenericType responseType) throws ClientErrorException {
         WebTarget resource = webTarget;
         resource = resource.path("findReservas");
-        return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
+        return (List <Reserva>) resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
     }
+    /*
+    public  <T> T Eliminar(Class<T> responseType) throws ClientErrorException {
+        WebTarget resource = webTarget;
+        resource = resource.path("DeleteReservas");
+        return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
+    }*/
+    
     
     public <T> T find(Class<T> responseType, String id) throws ClientErrorException {
         WebTarget resource = webTarget;
@@ -78,9 +88,17 @@ public class ReservaRESTClient implements ReservaManager {
     public void remove(String id) throws ClientErrorException {
         webTarget.path(java.text.MessageFormat.format("{0}", new Object[]{id})).request().delete();
     }
+    
 
     public void close() {
         client.close();
+    }
+
+   
+    public <T> T Eliminar(Class<T> responseType, String id) throws ClientErrorException {
+      WebTarget resource = webTarget;
+        resource = resource.path("DeleteReservas");
+        return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
     }
 
 }
