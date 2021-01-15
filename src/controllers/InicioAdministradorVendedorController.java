@@ -93,11 +93,11 @@ public class InicioAdministradorVendedorController {
     @FXML
     private Menu menuPerfil;
     @FXML
-    private Menu menuProveedor;
+    private Menu menuVendedor;
     @FXML
     private MenuItem menuAdministrador;
     @FXML
-    private MenuItem menuProveedores;
+    private MenuItem menuVendedores;
     @FXML
     private MenuItem menuSalir;
 
