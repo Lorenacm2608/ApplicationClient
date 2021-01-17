@@ -28,9 +28,9 @@
                   <MenuItem fx:id="menuSalir" mnemonicParsing="false" text="Salir" />
             </items>
           </Menu>
-          <Menu fx:id="menuProveedor" mnemonicParsing="false" text="Vendedor">
+          <Menu fx:id="menuProveedor" mnemonicParsing="false" text="Proveedor">
             <items>
-              <MenuItem fx:id="menuProveedores" mnemonicParsing="false" text="Lista de vendedores" />
+              <MenuItem fx:id="menuProveedores" mnemonicParsing="false" text="Lista de proveedores" />
             </items>
           </Menu>
         </menus>
