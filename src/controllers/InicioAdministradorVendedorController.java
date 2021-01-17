@@ -1,6 +1,8 @@
 package controllers;
 
+import java.io.IOException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -12,6 +14,7 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -26,7 +29,9 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TablePosition;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.cell.ChoiceBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
@@ -35,10 +40,12 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
+import javafx.util.converter.IntegerStringConverter;
 import javax.persistence.EntityManager;
 import modelo.Administrador;
 import modelo.EstadoUsuario;
 import modelo.Proveedor;
+import modelo.TipoProducto;
 import modelo.Usuario;
 import modelo.Vendedor;
 
@@ -57,8 +64,6 @@ public class InicioAdministradorVendedorController {
     @FXML
     private TableView<Vendedor> tbVendedores;
     @FXML
-    private TableColumn<Vendedor, String> colId;
-    @FXML
     private TableColumn<Vendedor, String> colUsuario;
     @FXML
     private TableColumn<Vendedor, String> colEmail;
@@ -69,13 +74,17 @@ public class InicioAdministradorVendedorController {
     @FXML
     private TableColumn<Vendedor, Date> colUltimoAcceso;
     @FXML
-    private TableColumn<Vendedor, String> colDni;
+    private TableColumn<Vendedor, String> colUltimaContrasenia;
     @FXML
     private TableColumn<Vendedor, String> colDireccion;
     @FXML
-    private TableColumn<Vendedor, String> colTienda;
+    private TableColumn<Vendedor, Integer> colTelefono;
+    @FXML
+    private TableColumn<Vendedor, String> colDni;
     @FXML
     private TableColumn<Vendedor, Integer> colSalario;
+    @FXML
+    private TableColumn<Vendedor, String> colTienda;
     @FXML
     private Label lblVendedor;
     @FXML
@@ -139,6 +148,8 @@ public class InicioAdministradorVendedorController {
      * @param root, clase parent
      */
     public void initStage(Parent root) {
+        //Indicamos las columnas que debe tener la tabla y como deben ser
+        iniciarColumnasTabla();
         LOG.log(Level.INFO, "Ventana Inicio de Administrador (Vendedor)");
         Scene scene = new Scene(root);
         stage.setScene(scene);
@@ -187,10 +198,16 @@ public class InicioAdministradorVendedorController {
         menuProveedor.getItems().add(menuProveedores);
         //pane.setTop(menuBar);
          */
+        //Indicamos las imagenes de los botones
         imagenBotones();
+        //Indicamos el metodo que se encargara de la apariencia del stage cuando se cierre la ventana
         stage.setOnCloseRequest(this::handleWindowClose);
+        //Indicamos el metodo que se encargara de la apariencia del stage cuando se inicie la ventana
         stage.setOnShowing(this::handleWindowShowing);
+        //Indicamos las acciones de cada boton 
         btnAltaVendedor.setOnAction(this::btnAltaVendedorClick);
+        btnBorrarVendedor.setOnAction(this::borrarVendedor);
+        //Mostramos el stage
         stage.show();
 
     }
@@ -226,6 +243,12 @@ public class InicioAdministradorVendedorController {
         LOG.log(Level.INFO, "Beginning InicioAdministradorVendedorController::handleWindowShowing");
         btnBorrarVendedor.setDisable(true);
 
+    }
+    
+    private int incrementarID() {
+        int vendedorID = tbVendedores.getSelectionModel().getSelectedIndex();
+        vendedorID++;
+        return vendedorID;
     }
 
     private void btnAltaVendedorClick(ActionEvent event) {
@@ -327,37 +350,30 @@ public class InicioAdministradorVendedorController {
      * @param event
      */
     private void borrarVendedor(ActionEvent event) {
-        LOG.log(Level.INFO, "Se ha borrado un proveedor");
-        tbVendedores.getItems().removeAll(tbVendedores.getSelectionModel().getSelectedItem());
-    }
+        //Confirmar mensaje
+        //Capturamos el indice del proveedor seleccionado y borro su item asociado de la tabla
+        int vendedorSeleccionado = tbVendedores.getSelectionModel().getSelectedIndex();
+        if (vendedorSeleccionado >= 0) {
+            //Borramos el proveedor
+            LOG.log(Level.INFO, "Se ha borrado un proveedor");
+            tbVendedores.getItems().remove(vendedorSeleccionado);
 
-    /**
-     *
-     * @param event
-     */
-    private void actualizarVendedor(ActionEvent event) {
-        LOG.log(Level.INFO, "Confirmación de guardado de cambios");
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setHeaderText(null);
-
-        alert.setTitle("Administrador");
-        alert.setContentText("¿Estas seguro de guardar los cambios?");
-        Optional<ButtonType> respuesta = alert.showAndWait();
-
-        if (respuesta.get() == ButtonType.OK) {
-            LOG.log(Level.INFO, "Has pulsado el boton Aceptar");
-            event.consume();
         } else {
-            LOG.log(Level.INFO, "Has pulsado el boton Cancelar");
-            event.consume();
+            //En el caso de no seleccionar un proveedor. Saldrá un alerta
+            Alert alerta = new Alert(Alert.AlertType.WARNING);
+            alerta.setTitle("Atención");
+            alerta.setHeaderText("Vendedor no seleccionado");
+            alerta.setContentText("Por favor, selecciona un vendedor de la tabla");
+            alerta.showAndWait();
+
         }
     }
-    
+
     /**
      * Inicializa la tabla de proveedores
      */
     private void iniciarColumnasTabla() {
-        /*
+        int id = incrementarID();
         seleccionarVendedor();
         //Hacemos que la tabla sea editable
         tbVendedores.setEditable(true);
@@ -368,68 +384,173 @@ public class InicioAdministradorVendedorController {
         //Id del proveedor
         colUsuario.setCellValueFactory(new PropertyValueFactory<>("login"));
         //Nombre del proveedor
-        colEmail.setCellValueFactory(new PropertyValueFactory<>("nombre"));
-        //Tipo de producto 
-        colNombre.setCellValueFactory(new PropertyValueFactory<>("tipo"));
-        //Empresa del proveedor
-        colEstado.setCellValueFactory(new PropertyValueFactory<>("empresa"));
-        //Email del proveedor
-        colUltimoAcceso.setCellValueFactory(new PropertyValueFactory<>("email"));
-        //Email del proveedor
-        colDni.setCellValueFactory(new PropertyValueFactory<>("email"));
-        //Email del proveedor
-        colDireccion.setCellValueFactory(new PropertyValueFactory<>("email"));
-        //Email del proveedor
-        colTienda.setCellValueFactory(new PropertyValueFactory<>("email"));
-        //Email del proveedor
-        colSalario.setCellValueFactory(new PropertyValueFactory<>("email"));
+        colEmail.setCellValueFactory(new PropertyValueFactory<>("email"));
         //Indicamos que la celda puede cambiar a un TextField
-        tcEmail.setCellFactory(TextFieldTableCell.forTableColumn());
-        //Aceptamos la edición de la celda de la columna email 
-        tcEmail.setOnEditCommit((TableColumn.CellEditEvent<Proveedor, String> data) -> {
+        colEmail.setCellFactory(TextFieldTableCell.forTableColumn());
+        //Aceptamos la edición de la celda de la columna descripción 
+        colEmail.setOnEditCommit((TableColumn.CellEditEvent<Vendedor, String> data) -> {
             LOG.log(Level.INFO, "Nuevo Email: {0}", data.getNewValue());
             LOG.log(Level.INFO, "Antiguo Email: {0}", data.getOldValue());
             //Devuelve el dato de la celda
-            Proveedor p = data.getRowValue();
+            Vendedor v = data.getRowValue();
             //Añadimos el nuevo valor a la celda
-            p.setEmail(data.getNewValue());
+            v.setEmail(data.getNewValue());
 
         });
-        //Teléfono del proveedor
-        tcTelefono.setCellValueFactory(new PropertyValueFactory<>("telefono"));
+        //Tipo de producto 
+        colNombre.setCellValueFactory(new PropertyValueFactory<>("fullname"));
         //Indicamos que la celda puede cambiar a un TextField
-        tcTelefono.setCellFactory(TextFieldTableCell.forTableColumn());
-        //Aceptamos la edición de la celda de la columna teléfono 
-        tcTelefono.setOnEditCommit((TableColumn.CellEditEvent<Proveedor, String> data) -> {
+        colNombre.setCellFactory(TextFieldTableCell.forTableColumn());
+        //Aceptamos la edición de la celda de la columna email 
+        colNombre.setOnEditCommit((TableColumn.CellEditEvent<Vendedor, String> data) -> {
+            LOG.log(Level.INFO, "Nuevo Nombre: {0}", data.getNewValue());
+            LOG.log(Level.INFO, "Antiguo Nombre: {0}", data.getOldValue());
+            //Devuelve el dato de la celda
+            Vendedor v = data.getRowValue();
+            //Añadimos el nuevo valor a la celda
+            v.setFullname(data.getNewValue());
+
+        });
+        //Empresa del proveedor
+        colEstado.setCellValueFactory(new PropertyValueFactory<>("status"));
+        //Indicamos que la celda puede cambiar a un TextField
+        colEstado.setCellFactory(ChoiceBoxTableCell.
+                forTableColumn(EstadoUsuario.ENABLED, EstadoUsuario.DISABLED));
+        colEstado.addEventHandler(TableColumn.<Vendedor, EstadoUsuario>editCommitEvent(),
+                event -> actualizarEstadoVendedor(event));
+        //Email del proveedor
+        colUltimoAcceso.setCellValueFactory(new PropertyValueFactory<>("lastAccess"));
+        //Ultima contraseña del vendedor
+        colUltimaContrasenia.setCellValueFactory(new PropertyValueFactory<>("lastPasswordChange"));
+        //Email del proveedor
+        colDireccion.setCellValueFactory(new PropertyValueFactory<>("direccion"));
+        //Indicamos que la celda puede cambiar a un TextField
+        colDireccion.setCellFactory(TextFieldTableCell.forTableColumn());
+        //Aceptamos la edición de la celda de la columna email 
+        colDireccion.setOnEditCommit((TableColumn.CellEditEvent<Vendedor, String> data) -> {
+            LOG.log(Level.INFO, "Nueva Direccion: {0}", data.getNewValue());
+            LOG.log(Level.INFO, "Antigua Direccion: {0}", data.getOldValue());
+            //Devuelve el dato de la celda
+            Vendedor v = data.getRowValue();
+            //Añadimos el nuevo valor a la celda
+            v.setDireccion(data.getNewValue());
+
+        });
+        //Telefono del vendedor
+        colTelefono.setCellValueFactory(new PropertyValueFactory<>("telefono"));
+        //Indicamos que la celda puede cambiar a un TextField
+        colTelefono.setCellFactory(TextFieldTableCell.<Vendedor, Integer>forTableColumn(new IntegerStringConverter()));
+        //Aceptamos la edición de la celda de la columna email 
+        colTelefono.setOnEditCommit((TableColumn.CellEditEvent<Vendedor, Integer> data) -> {
             LOG.log(Level.INFO, "Nuevo Telefono: {0}", data.getNewValue());
             LOG.log(Level.INFO, "Antiguo Telefono: {0}", data.getOldValue());
             //Devuelve el dato de la celda
-            Proveedor p = data.getRowValue();
+            Vendedor v = data.getRowValue();
             //Añadimos el nuevo valor a la celda
-            p.setTelefono(data.getNewValue());
+            v.setTelefono(data.getNewValue());
 
         });
-        //Descripción del proveedor
-        tcDescripcion.setCellValueFactory(new PropertyValueFactory<>("descripcion"));
+        //Email del proveedor
+        colDni.setCellValueFactory(new PropertyValueFactory<>("dni"));
         //Indicamos que la celda puede cambiar a un TextField
-        tcDescripcion.setCellFactory(TextFieldTableCell.forTableColumn());
-        //Aceptamos la edición de la celda de la columna descripción 
-        tcDescripcion.setOnEditCommit((TableColumn.CellEditEvent<Proveedor, String> data) -> {
-            LOG.log(Level.INFO, "Nueva Descripción: {0}", data.getNewValue());
-            LOG.log(Level.INFO, "Antiguo Descripción: {0}", data.getOldValue());
+        colDni.setCellFactory(TextFieldTableCell.forTableColumn());
+        //Aceptamos la edición de la celda de la columna email 
+        colDni.setOnEditCommit((TableColumn.CellEditEvent<Vendedor, String> data) -> {
+            LOG.log(Level.INFO, "Nuevo Dni: {0}", data.getNewValue());
+            LOG.log(Level.INFO, "Antiguo Dni: {0}", data.getOldValue());
             //Devuelve el dato de la celda
-            Proveedor p = data.getRowValue();
+            Vendedor v = data.getRowValue();
             //Añadimos el nuevo valor a la celda
-            p.setDescripcion(data.getNewValue());
+            v.setDni(data.getNewValue());
 
         });
-        //Administrador asociado con el proveedor 
-        tcAdmin.setCellValueFactory(new PropertyValueFactory<>("id_usuario"));
-        //Añadimos las celdas dentro de la tabla de Proveedores (tbProveedor)
-        proveedores.forEach((p) -> {
-            tbProveedor.getItems().add(p);
+        //Email del proveedor
+        colSalario.setCellValueFactory(new PropertyValueFactory<>("salario"));
+        //Indicamos que la celda puede cambiar a un TextField
+        colSalario.setCellFactory(TextFieldTableCell.<Vendedor, Integer>forTableColumn(new IntegerStringConverter()));
+        //Aceptamos la edición de la celda de la columna email 
+        colSalario.setOnEditCommit((TableColumn.CellEditEvent<Vendedor, Integer> data) -> {
+            LOG.log(Level.INFO, "Nuevo Salario: {0}", data.getNewValue());
+            LOG.log(Level.INFO, "Antiguo Salario: {0}", data.getOldValue());
+            //Devuelve el dato de la celda
+            Vendedor v = data.getRowValue();
+            //Añadimos el nuevo valor a la celda
+            v.setSalario(data.getNewValue());
+
         });
-        */
+        //Email del proveedor
+        colTienda.setCellValueFactory(new PropertyValueFactory<>("tienda"));
+        //Indicamos que la celda puede cambiar a un TextField
+        colTienda.setCellFactory(TextFieldTableCell.forTableColumn());
+        //Aceptamos la edición de la celda de la columna email 
+        colTienda.setOnEditCommit((TableColumn.CellEditEvent<Vendedor, String> data) -> {
+            LOG.log(Level.INFO, "Nueva Tienda: {0}", data.getNewValue());
+            LOG.log(Level.INFO, "Antigua Tienda: {0}", data.getOldValue());
+            //Devuelve el dato de la celda
+            Vendedor v = data.getRowValue();
+            //Añadimos el nuevo valor a la celda
+            v.setTienda(data.getNewValue());
+
+        });
+        
+    }
+    
+    /**
+     * Nos permite seleccionar a un proveedor de la tabla y este controla que el
+     * botón BorrarProveedor y ActualizarProveedor esté habilitado o
+     * deshabilitado
+     */
+    private void seleccionarVendedor() {
+        tbVendedores.getSelectionModel().selectedItemProperty().addListener(
+                (observable, oldValue, newValue) -> {
+                    if (vendedor != null) {
+                        btnBorrarVendedor.setDisable(true);
+                    } else {
+                        btnBorrarVendedor.setDisable(false);
+                    }
+                });
+    }
+    
+    //CONFIGURACIÓN DEL MENÚ
+    /**
+     * MenuItem que muestra un alerta informandonos de la conexión actual del
+     * usuario
+     *
+     * @param event
+     */
+    @FXML
+    private void configMenuAdministrador(ActionEvent event) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setHeaderText(null);
+        alert.setTitle("Información del Administrador");
+        alert.setHeaderText("Usuario: Administrador");
+
+        SimpleDateFormat sdf = new SimpleDateFormat("hh:mm dd-MMM-aaaa");
+        String fechaComoCadena = sdf.format(new Date());
+        alert.setContentText(fechaComoCadena);
+        alert.showAndWait();
+    }
+
+    /**
+     * MenuItem que nos redirige hacia la ventana de LogIn y cierra la ventana
+     * actual
+     *
+     * @param event
+     */
+    @FXML
+    private void configMenuSalir(ActionEvent event) {
+        LOG.log(Level.INFO, "Ventana Login");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/LogIn.fxml"));
+
+            Parent root = (Parent) loader.load();
+
+            LogInController controller = ((LogInController) loader.getController());
+            controller.initStage(root);
+            stage.hide();
+        } catch (IOException e) {
+            LOG.log(Level.SEVERE, "Se ha producido un error de E/S");
+        }
     }
     
     /**
@@ -451,8 +572,15 @@ public class InicioAdministradorVendedorController {
         ObservableList<Vendedor> datos = FXCollections.observableArrayList(vendedor);
         tbVendedores.setItems(datos);
 */
+        tbVendedores.setItems(FXCollections.observableArrayList(vendedores));
     }
     public void setEntityManager(EntityManager entityManager) {
         this.entityManager = entityManager;
+    }
+
+    private void actualizarEstadoVendedor(TableColumn.CellEditEvent<Vendedor, EstadoUsuario> event) {
+        Vendedor vendedor = event.getRowValue();
+        EstadoUsuario estado = event.getNewValue();
+        vendedor.setStatus(event.getNewValue());
     }
 }

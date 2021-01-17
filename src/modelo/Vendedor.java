@@ -45,6 +45,7 @@ public class Vendedor extends Usuario implements Serializable {
      */
     
     private String tienda;
+    private Long id_vendedor;
 
     /**
      * Devuelve una lista de productos
@@ -160,6 +161,10 @@ public class Vendedor extends Usuario implements Serializable {
     @Override
     public String toString() {
         return "flyshoes.entity.Vendedor[ id=" + dni + " ]";
+    }
+
+    public void setIdVendedor(Long id_vendedor) {
+        this.id_vendedor= id_vendedor;
     }
 
 }
