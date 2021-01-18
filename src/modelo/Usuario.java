@@ -284,7 +284,7 @@ public class Usuario implements Serializable {
 
     @Override
     public String toString() {
-        return "flyshoes.entity.Usuario[ id=" + id_usuario + " ]";
+        return login ;
     }
 
 }

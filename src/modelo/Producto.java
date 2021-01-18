@@ -308,7 +308,7 @@ public class Producto implements Serializable {
      */
     @Override
     public String toString() {
-        return "flyshoes.entity.Producto[ id=" + id + " ]";
+        return  modelo;
     }
 
 }

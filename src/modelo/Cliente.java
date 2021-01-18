@@ -62,5 +62,7 @@ public class Cliente extends Usuario implements Serializable {
     public void setVendedor(Vendedor vendedor) {
         this.vendedor = vendedor;
     }
+    
+    
 
 }

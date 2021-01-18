@@ -2,32 +2,55 @@
 
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.text.Font?>
 
-<Pane fx:id="pnReserva" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="508.0" prefWidth="804.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.ReservaController">
+<Pane fx:id="pnReserva" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="650.0" prefWidth="926.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.ReservaController">
    <children>
-      <Label fx:id="lblReservas" alignment="CENTER" layoutX="11.0" layoutY="14.0" prefHeight="48.0" prefWidth="783.0" text="FlyShoes Reserva">
+      <Label fx:id="lblReservas" alignment="CENTER" layoutX="59.0" layoutY="56.0" prefHeight="48.0" prefWidth="783.0" text="FlyShoes Reserva">
          <font>
             <Font size="25.0" />
          </font>
       </Label>
-      <TableView fx:id="tbReservas" layoutX="32.0" layoutY="92.0" prefHeight="342.0" prefWidth="701.0">
+      <TableView fx:id="tbReservas" layoutX="25.0" layoutY="160.0" prefHeight="388.0" prefWidth="783.0">
         <columns>
-          <TableColumn prefWidth="110.0" text="id_cliente" />
-          <TableColumn prefWidth="110.0" text="id_producto" />
-            <TableColumn prefWidth="110.0" text="cantidad" />
-            <TableColumn prefWidth="110.0" text="descripción" />
-            <TableColumn prefWidth="110.0" text="estado" />
-            <TableColumn prefWidth="110.0" text="fecha">
+          <TableColumn fx:id="tcCliente" prefWidth="110.0" text="cliente" />
+          <TableColumn fx:id="tcProducto" prefWidth="139.0" text="producto" />
+            <TableColumn fx:id="tcCantidad" prefWidth="123.0" text="cantidad" />
+            <TableColumn fx:id="tcDescripcion" prefWidth="125.0" text="descripción" />
+            <TableColumn fx:id="tcEstado" prefWidth="139.0" text="estado" />
+            <TableColumn fx:id="tcFecha" prefWidth="143.0" text="fecha">
                <columns>
-                  <TableColumn prefWidth="75.0" text="Reserva" />
-                  <TableColumn prefWidth="75.0" text="Entrega" />
+                  <TableColumn fx:id="tcReserva" prefWidth="75.0" text="Reserva" />
+                  <TableColumn fx:id="tcEntrega" prefWidth="75.0" text="Entrega" />
                </columns></TableColumn>
         </columns>
       </TableView>
-      <Button fx:id="btnVolver" layoutX="700.0" layoutY="450.0" mnemonicParsing="false" prefHeight="34.0" prefWidth="75.0" text="Volver" />
+      <Button fx:id="btnVolver" layoutX="811.0" layoutY="592.0" mnemonicParsing="false" prefHeight="34.0" prefWidth="75.0" text="Volver" />
+      <Button fx:id="btnInsertar" layoutX="826.0" layoutY="238.0" mnemonicParsing="false" text="Insertar" />
+      <Button fx:id="btnBorrar" layoutX="831.0" layoutY="412.0" mnemonicParsing="false" text="Borrar" />
+      <TextField fx:id="tfBuscar" layoutX="264.0" layoutY="117.0" />
+      <Button fx:id="btnBuscar" layoutX="465.0" layoutY="117.0" mnemonicParsing="false" text="Buscar" />
+      <MenuBar fx:id="menuBar" prefHeight="0.0" prefWidth="926.0">
+        <menus>
+          <Menu fx:id="menuCliente" mnemonicParsing="false" text="Perfil">
+            <items>
+                  <MenuItem fx:id="menuPerfil" mnemonicParsing="false" onAction="#configMenuCliente" text="Perfil" />
+              <MenuItem fx:id="menuSalir" mnemonicParsing="false" onAction="#configMenuSalir" text="Salir" />
+            </items>
+          </Menu>
+          <Menu fx:id="menuAyuda" mnemonicParsing="false" text="Ayuda">
+            <items>
+              <MenuItem fx:id="menuAbout" mnemonicParsing="false" onAction="#configMenuSobreNosotros" text="Sobre Nosotros" />
+            </items>
+          </Menu>
+        </menus>
+      </MenuBar>
    </children>
 </Pane>

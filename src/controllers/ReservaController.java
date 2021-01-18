@@ -52,6 +52,7 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import javafx.util.converter.IntegerStringConverter;
 import javax.ws.rs.core.GenericType;
 import manager.ReservaManager;
 import modelo.Usuario;
@@ -73,9 +74,9 @@ public class ReservaController implements Initializable {
     @FXML
     private TableView<Reserva> tbReservas;
     @FXML
-    private TableColumn<Reserva, Cliente> tcIdCliente;
+    private TableColumn<Reserva, Cliente> tcCliente;
     @FXML
-    private TableColumn<Reserva, Producto> tcIdProducto;
+    private TableColumn<Reserva, Producto> tcProducto;
     @FXML
     private TableColumn<Reserva,Integer> tcCantidad;
     @FXML
@@ -204,7 +205,7 @@ public class ReservaController implements Initializable {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setHeaderText(null);
         alert.setTitle("Cliente");
-        alert.setContentText("¿Estas seguro de confirmar la acción?");
+        alert.setContentText("¿Estas seguro de cerrar la ventana?");
         Optional<ButtonType> respuesta = alert.showAndWait();
 
         if (respuesta.get() == ButtonType.OK) {
@@ -243,24 +244,36 @@ public class ReservaController implements Initializable {
         //convertimos la tabla editable.
         tbReservas.setEditable(true);
 
-        //Id del cliente
-        tcIdCliente.setCellValueFactory(new PropertyValueFactory<>("cliente"));
-        //id del producto
-        tcIdProducto.setCellValueFactory(new PropertyValueFactory<>("producto"));
+        //Nombre del cliente
+        tcCliente.setCellValueFactory(new PropertyValueFactory<>("cliente"));
+        /*
+        tcCliente.setCellFactory(TextFieldTableCell.forTableColumn());
+        tcCliente.setOnEditCommit((TableColumn.CellEditEvent<Reserva, Cliente> des) -> {
+            LOG.log(Level.INFO, "Nuevo Nombre: {0}", des.getNewValue());
+            LOG.log(Level.INFO, "Antiguo Nombre: {0}", des.getOldValue());
+            //Devuelve el dato de la celda
+            Reserva res = des.getRowValue();
+            //Añadimos el nuevo valor a la celda
+            
+            res.setCliente(des.getNewValue());
+        });*/
+        //Modelo del producto
+        tcProducto.setCellValueFactory(new PropertyValueFactory<>("producto"));
         //cantidad de la reserva
         tcCantidad.setCellValueFactory(new PropertyValueFactory<>("cantidad")); 
+        tcCantidad.setCellFactory(TextFieldTableCell.<Reserva, Integer>forTableColumn(new IntegerStringConverter()));
         //Descripcion de la reserva, esta es editable.
         tcDescripcion.setCellValueFactory(new PropertyValueFactory<>("descripcion"));    
         tcDescripcion.setCellFactory(TextFieldTableCell.forTableColumn());
         tcDescripcion.setOnEditCommit((TableColumn.CellEditEvent<Reserva, String> des) -> {
-            LOG.log(Level.INFO, "Nuevo Email: {0}", des.getNewValue());
-            LOG.log(Level.INFO, "Antiguo Email: {0}", des.getOldValue());
+            LOG.log(Level.INFO, "Nueva descripcion: {0}", des.getNewValue());
+            LOG.log(Level.INFO, "Antigua descripcion: {0}", des.getOldValue());
             //Devuelve el dato de la celda
             Reserva res = des.getRowValue();
             //Añadimos el nuevo valor a la celda
             res.setDescripcion(des.getNewValue());
         });
-        //Estado de la reserva, esta es editable.
+        //Estado de la reserva, esta es editable. AÑADIR UN LISTNER A CADA ESTADO CUANDO PONESMOS EL OBVSERVAVLE ..
         tcEstado.setCellValueFactory(new PropertyValueFactory<>("estado"));
             tcEstado.setCellFactory(ChoiceBoxTableCell.
                     forTableColumn(EstadoReserva.CANCELADA, EstadoReserva.CONFIRMADA, EstadoReserva.EXPIRADA, EstadoReserva.REALIZADA));
@@ -421,10 +434,19 @@ public class ReservaController implements Initializable {
      */
     @FXML
     private void configMenuSalir(ActionEvent event) {
-        LOG.log(Level.INFO, "Ventana Login");
-        LOG.log(Level.INFO, "Closing application.");
-        //Closes application.
-        Platform.exit();
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setHeaderText(null);
+        alert.setTitle("Cliente");
+        alert.setContentText("¿Estas seguro de cerrar la ventana?");
+        Optional<ButtonType> respuesta = alert.showAndWait();
+
+        if (respuesta.get() == ButtonType.OK) {
+            LOG.log(Level.INFO, "Has pulsado el boton Aceptar");
+            stage.hide();
+        } else {
+            LOG.log(Level.INFO, "Has pulsado el boton Cancelar");
+            event.consume();
+        }
     }
     /**
      * MenuItem que muestra un alerta informandonos de la conexión actual del
