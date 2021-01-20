@@ -1,14 +1,19 @@
 package controllers;
 
+import exceptions.DeleteException;
 import exceptions.ErrorBDException;
 import exceptions.ErrorServerException;
+import exceptions.InsertException;
 import exceptions.UpdateException;
 import exceptions.VendedorNotFoundException;
+import exceptions.VendedorYaExisteException;
 import implementation.AdministradorManagerImplementation;
 import implementation.VendedorManagerImplementation;
 import java.io.IOException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -50,10 +55,14 @@ import javafx.stage.WindowEvent;
 import javafx.util.converter.IntegerStringConverter;
 import javax.persistence.EntityManager;
 import javax.ws.rs.ClientErrorException;
+import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
 import manager.AdministradorManager;
 import manager.VendedorManager;
 import modelo.Administrador;
 import modelo.EstadoUsuario;
+import static modelo.EstadoUsuario.ENABLED;
+import static modelo.PrivilegioUsuario.VENDEDOR;
 import modelo.Proveedor;
 import modelo.Usuario;
 import modelo.Vendedor;
@@ -111,11 +120,11 @@ public class InicioAdministradorVendedorController {
     @FXML
     private Menu menuPerfil;
     @FXML
-    private Menu menuVendedor;
+    private Menu menuProveedor;
     @FXML
     private MenuItem menuAdministrador;
     @FXML
-    private MenuItem menuVendedores;
+    private MenuItem menuProveedores;
     @FXML
     private MenuItem menuSalir;
 
@@ -158,49 +167,6 @@ public class InicioAdministradorVendedorController {
         stage.setScene(scene);
         stage.setTitle("Administrador");
         stage.setResizable(false);
-        opcionesMenu();
-
-        //Pane pane = new Pane();
-        //MenuBar
-        /*
-         menuBar = new MenuBar();
-        //Menus 
-         menuPerfil = new Menu("Perfil");
-         menuProveedor = new Menu("Proveedor");
-        //MenuItem
-         menuProveedores = new MenuItem("Lista de proveedores");
-         menuSalir = new MenuItem("Salir");
-         menuAdministrador = new MenuItem("Administrador");
-        //Añadimos las acciones
-        menuSalir.setOnAction(new EventHandler<ActionEvent>() {
-            public void handle(ActionEvent t) {
-                LOG.log(Level.INFO, "Se ha pulsado el MenuItem -- Salir");
-                stage.close();
-            }
-        });
-        menuProveedores.setOnAction(new EventHandler<ActionEvent>() {
-            public void handle(ActionEvent t) {
-                LOG.log(Level.INFO, "Se ha pulsado el MenuItem -- Lista de proveedores");
-            }
-        });
-        menuAdministrador.setOnAction(new EventHandler<ActionEvent>() {
-            public void handle(ActionEvent t) {
-                LOG.log(Level.INFO, "Se ha pulsado el MenuItem -- Administrador");
-                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("Administrador");
-                alert.setHeaderText(null);
-                alert.setContentText("Informacion del administrador");
-                alert.initStyle(StageStyle.UTILITY);
-                alert.showAndWait();
-            }
-        });
-        //Añadimos los menus dentro del menuBar 
-        menuBar.getMenus().addAll(menuPerfil, menuProveedor);
-        //Añadimos el menuItem dentro del menu 
-        menuPerfil.getItems().addAll(menuAdministrador, menuSalir);
-        menuProveedor.getItems().add(menuProveedores);
-        //pane.setTop(menuBar);
-         */
         //Indicamos las imagenes de los botones
         imagenBotones();
         //Indicamos el metodo que se encargara de la apariencia del stage cuando se cierre la ventana
@@ -212,9 +178,8 @@ public class InicioAdministradorVendedorController {
         btnAltaVendedor.setTooltip(new Tooltip("Pulse para dar de alta un nuevo vendedor "));
         btnBorrarVendedor.setOnAction(this::btnBorrarVendedorClick);
         btnBorrarVendedor.setTooltip(new Tooltip("Pulse para borrar el producto selecionado "));
-        btnBuscar.setOnAction(this::btnBuscarClick);
         //Indicamos que el textField va a tener un metodo asociado
-        txtBuscarVendedor.textProperty().addListener(this::txtChanged);
+        txtBuscarVendedor.textProperty().addListener(this::txtBuscarVendedorNombre);
         //Mostramos el stage
         stage.show();
 
@@ -271,7 +236,48 @@ public class InicioAdministradorVendedorController {
     }
     
     private void btnAltaVendedorClick(ActionEvent event) {
-        //Posicion actual
+        try {
+            /*
+            LocalDate fechaHoy = LocalDate.now();
+            ZoneId defaultZoneId = ZoneId.systemDefault();
+            Date date = Date.from(fechaHoy.atStartOfDay(defaultZoneId).toInstant());
+
+            //Instanciamos un nuevo proveedor dandole valores por defecto
+            Vendedor nuevoVendedor = new Vendedor();
+            //Añadimos por defecto que el administrador va a ser null
+            nuevoVendedor.setAdministrador(null);
+            //Añadimos por defecto que la descripción está vacia
+            nuevoVendedor.setDni("");
+            //Añadimos por defecto que  el email está vacio
+            nuevoVendedor.setSalario(0);
+            //Añadimos por defecto que la empresa está vacia
+            nuevoVendedor.setLogin("");
+            //Añadimos por defecto que el nombre está vacio
+            nuevoVendedor.setEmail("");
+            //Añadimos por defecto que el teléfono está vacio
+            nuevoVendedor.setFullname("");
+            //Añadimos por defecto que el tipo del producto va a ser ROPA
+            nuevoVendedor.setStatus(ENABLED);
+            //Añadimos por defecto que la fecha de alta será el dia de actual
+            nuevoVendedor.setPrivilege(VENDEDOR);
+            nuevoVendedor.setPassword("");
+            nuevoVendedor.setLastAccess(date);
+            nuevoVendedor.setLastPasswordChange("");
+            //Implementación del ProveedorRESTClient
+            vendedorManager = (VendedorManagerImplementation) new factory.VendedorFactory().getVendedorManagerImplementation();
+            //Llamamos al método create para asi poder crear un nuevo proveedor
+            vendedorManager.create(nuevoVendedor);
+            //Añadimos en nuevo proveedor dentro del listProveedores (ObservableList)
+            listvendedores.add(nuevoVendedor);
+            int row = listvendedores.size() - 1;
+
+            // Seleccionamos la nueva fila
+            tbVendedores.requestFocus();
+            tbVendedores.getSelectionModel().select(row);
+            tbVendedores.getFocusModel().focus(row);
+            //}
+*/
+            //Posicion actual
         TablePosition pos = tbVendedores.getFocusModel().getFocusedCell();
         //
         tbVendedores.getSelectionModel().clearSelection();
@@ -282,8 +288,59 @@ public class InicioAdministradorVendedorController {
         int row = tbVendedores.getItems().size() - 1;
         tbVendedores.getSelectionModel().select(row, pos.getTableColumn());
         tbVendedores.scrollTo(nuevoVendedor);
+        } catch (ClientErrorException ex) {
+            Logger.getLogger(InicioAdministradorVendedorController.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
+    /**
+     * Borra el proveedor seleccionado de la tabla de vendedores
+     *
+     * @param event
+     */
+    private void btnBorrarVendedorClick(ActionEvent event) {
+        //Mensaje de confirmación para el borrado
+        alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setHeaderText(null);
+        alert.setTitle("Borrado de Vendedor");
+        alert.setContentText("¿Estas seguro de borrar este vendedor?");
+        Optional<ButtonType> respuesta = alert.showAndWait();
+        //En el caso de pulsar el boton Aceptar, borraremos el proveedor seleccionado
+        if (respuesta.get() == ButtonType.OK) {
+            LOG.log(Level.INFO, "Has pulsado el boton Aceptar");
+            //Capturamos el indice del proveedor seleccionado y borro su item asociado de la tabla
+            int vendedorIndex = tbVendedores.getSelectionModel().getSelectedIndex();
+            if (vendedorIndex >= 0) {
+                try {
+                    //Implementación del ProveedorRESTClient
+                    vendedorManager = (VendedorManagerImplementation) new factory.VendedorFactory().getVendedorManagerImplementation();
+                    //Llamamos al método remove para asi poder eliminar el proveedor que está seleccionado
+                    vendedorManager.remove(tbVendedores.getSelectionModel().getSelectedItem().getIdVendedor().toString());
+                    //Mostramos los datos actualizados en la tabla
+                    datosTabla();
+                    LOG.log(Level.INFO, "Se ha borrado un vendedor");
+                } catch (ClientErrorException ex) {
+                    LOG.log(Level.SEVERE, "ClientErrorException");
+                    alert = new Alert(AlertType.ERROR);
+                    alert.setTitle("Administrador");
+                    alert.setHeaderText("Imposible conectar. Inténtelo más tarde");
+                    alert.showAndWait();
+                }
+            } else {
+                //En el caso de no seleccionar un proveedor. Saldrá un alerta
+                Alert alerta = new Alert(AlertType.WARNING);
+                alerta.setTitle("Atención");
+                alerta.setHeaderText("Vendedor no seleccionado");
+                alerta.setContentText("Por favor, selecciona un vendedor de la tabla");
+                alerta.showAndWait();
+            }
+        } else {
+            LOG.log(Level.INFO, "Has pulsado el boton Cancelar");
+            //Desaparece el alerta
+            event.consume();
+        }
+    }
+    
     private void imagenBotones() {
         //Creamos un objeto y en él guardaremos la ruta donde se encuentra las imagenes para los botones
         URL linkAlta = getClass().getResource("/img/usuario.png");
@@ -300,91 +357,6 @@ public class InicioAdministradorVendedorController {
         btnBorrarVendedor.setGraphic(new ImageView(imageBorrar));
     }
 
-    private void opcionesMenu() {
-        //Barra de menú
-        MenuBar menuBar = new MenuBar();
-        //Opción del menú -- Perfil
-        Menu menuPerfil = new Menu();
-        //Añadimos el menuItem Administrador a la opción de menú de Perfil
-        MenuItem menuAdministrador = new MenuItem("Administrador");
-        menuPerfil.getItems().add(menuAdministrador);
-        /*
-        //Opción del menú -- Salir
-        Menu menuSalir = new Menu();
-        
-        //Añadimos a la barra de menú las opciones creadas
-        menuBar.getMenus().addAll(menuPerfil, menuSalir);
-
-  //BorderPane root = new BorderPane();
-        //MenuBar
-        MenuBar menuBar = new MenuBar();
-        //Menus 
-        Menu menuPerfil = new Menu("Perfil");
-        Menu menuProveedor = new Menu("Proveedor");
-        //MenuItem
-        MenuItem menuProveedores = new MenuItem("Lista de proveedores");
-        MenuItem menuSalir = new MenuItem("Salir");
-        MenuItem menuAdministrador = new MenuItem("Administrador");
-        //Añadimos las acciones
-        menuSalir.setOnAction(new EventHandler<ActionEvent>() {
-            public void handle(ActionEvent t) {
-                LOG.log(Level.INFO, "Se ha pulsado el MenuItem -- Salir");
-                stage.close();
-            }
-        });
-        menuProveedores.setOnAction(new EventHandler<ActionEvent>() {
-            public void handle(ActionEvent t) {
-                LOG.log(Level.INFO, "Se ha pulsado el MenuItem -- Lista de proveedores");
-            }
-        });
-        menuAdministrador.setOnAction(new EventHandler<ActionEvent>() {
-            public void handle(ActionEvent t) {
-                LOG.log(Level.INFO, "Se ha pulsado el MenuItem -- Administrador");
-                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("Administrador");
-                alert.setHeaderText(null);
-                alert.setContentText("Informacion del administrador");
-                alert.initStyle(StageStyle.UTILITY);
-                alert.showAndWait();
-            }
-        });
-        //Añadimos los menus dentro del menuBar 
-        menuBar.getMenus().addAll(menuPerfil, menuProveedor);
-        //Añadimos el menuItem dentro del menu 
-        menuPerfil.getItems().addAll(menuAdministrador, menuSalir);
-        menuProveedor.getItems().add(menuProveedores);
-        root.setTop(menuBar);
-        Scene scene = new Scene(root);
-        stage.setTitle("Administrador");
-        stage.setResizable(false);
-        stage.setScene(scene);
-        stage.show();
-        */
-    }
-/**
-     * Borra el proveedor seleccionado de la tabla de vendedores
-     *
-     * @param event
-     */
-    private void btnBorrarVendedorClick(ActionEvent event) {
-        //Confirmar mensaje
-        //Capturamos el indice del proveedor seleccionado y borro su item asociado de la tabla
-        int vendedorSeleccionado = tbVendedores.getSelectionModel().getSelectedIndex();
-        if (vendedorSeleccionado >= 0) {
-            //Borramos el proveedor
-            LOG.log(Level.INFO, "Se ha borrado un proveedor");
-            tbVendedores.getItems().remove(vendedorSeleccionado);
-
-        } else {
-            //En el caso de no seleccionar un proveedor. Saldrá un alerta
-            Alert alerta = new Alert(Alert.AlertType.WARNING);
-            alerta.setTitle("Atención");
-            alerta.setHeaderText("Vendedor no seleccionado");
-            alerta.setContentText("Por favor, selecciona un vendedor de la tabla");
-            alerta.showAndWait();
-
-        }
-    }
 
     /**
      * Inicializa la tabla de proveedores
@@ -400,6 +372,18 @@ public class InicioAdministradorVendedorController {
         //Definimos las celdas de la tabla, incluyendo que algunas pueden ser editables
         //Id del proveedor
         colUsuario.setCellValueFactory(new PropertyValueFactory<>("login"));
+        //Indicamos que la celda puede cambiar a un TextField
+        colUsuario.setCellFactory(TextFieldTableCell.forTableColumn());
+        //Aceptamos la edición de la celda de la columna descripción 
+        colUsuario.setOnEditCommit((TableColumn.CellEditEvent<Vendedor, String> data) -> {
+            LOG.log(Level.INFO, "Nuevo Usuario: {0}", data.getNewValue());
+            LOG.log(Level.INFO, "Antiguo Usuario: {0}", data.getOldValue());
+            //Devuelve el dato de la celda
+            Vendedor v = data.getRowValue();
+            //Añadimos el nuevo valor a la celda
+            v.setLogin(data.getNewValue());
+
+        });
         //Nombre del proveedor
         colEmail.setCellValueFactory(new PropertyValueFactory<>("email"));
         //Indicamos que la celda puede cambiar a un TextField
@@ -626,8 +610,32 @@ public class InicioAdministradorVendedorController {
      *
      * @param event
      */
-    private void btnBuscarClick(ActionEvent event) {
+    private void txtBuscarVendedorNombre(ObservableValue observable, String oldValue, String newValue) {
+    FilteredList<Vendedor> filteredData = new FilteredList<>(listvendedores, u -> true);
 
+        filteredData.setPredicate(vendedor -> {
+            //Cuando el TextField de búsqueda esté vacío, mostrará todos los proveedores
+            if (newValue == null || newValue.isEmpty()) {
+                return true;
+            }
+
+            //Ponemos el valor en minúsculas
+            String lowerCaseFilter = newValue.toLowerCase();
+            //Buscamos al proveedor usando el nombre de la empresa
+            if (vendedor.getFullname().toLowerCase().contains(lowerCaseFilter)) {
+                return true; //Proveedor encontrado(s)
+            }
+
+            return false; // Proveedor no encontrado(s)
+        });
+        // Convertimos la FilteredList en una SortedList.
+        SortedList<Vendedor> sortedData = new SortedList<>(filteredData);
+
+        // Se vincula el comparador SortedList al de la TableView.
+        sortedData.comparatorProperty().bind(tbVendedores.comparatorProperty());
+
+        // Añade los datos filtrados a la tabla
+        tbVendedores.setItems(sortedData);
     }
     
     public void setEntityManager(EntityManager entityManager) {
@@ -669,8 +677,8 @@ public class InicioAdministradorVendedorController {
 
             Parent root = (Parent) loader.load();
 
-            /*InicioAdministradorProveedorController controller = ((InicioAdministradorProveedorController) loader.getController());
-            controller.initStage(root);*/
+            InicioAdministradorProveedorController controller = ((InicioAdministradorProveedorController) loader.getController());
+            controller.initStage(root);
             stage.hide();
         } catch (IOException e) {
             LOG.log(Level.SEVERE, "Se ha producido un error de E/S");

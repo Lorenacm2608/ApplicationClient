@@ -24,13 +24,13 @@
         <menus>
           <Menu fx:id="menuPerfil" mnemonicParsing="false" text="Perfil">
             <items>
-              <MenuItem fx:id="menuAdministrador" mnemonicParsing="false" text="Administrador" />
-                  <MenuItem fx:id="menuSalir" mnemonicParsing="false" text="Salir" />
+              <MenuItem fx:id="menuAdministrador" mnemonicParsing="false" text="Administrador" onAction="#configMenuAdministrador"/>
+                  <MenuItem fx:id="menuSalir" mnemonicParsing="false" text="Salir" onAction="#configMenuSalir"/>
             </items>
           </Menu>
           <Menu fx:id="menuProveedor" mnemonicParsing="false" text="Proveedor">
             <items>
-              <MenuItem fx:id="menuProveedores" mnemonicParsing="false" text="Lista de proveedores" />
+              <MenuItem fx:id="menuProveedores" mnemonicParsing="false" text="Lista de proveedores" onAction="#configMenuProveedores"/>
             </items>
           </Menu>
         </menus>

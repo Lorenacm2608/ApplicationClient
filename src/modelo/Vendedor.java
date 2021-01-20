@@ -23,6 +23,16 @@ public class Vendedor extends Usuario implements Serializable {
     
     private Set<Producto> productos;
     
+    //id del vendedor
+    private Long idVendedor;
+
+    public Long getIdVendedor() {
+        return idVendedor;
+    }
+
+    public void setIdVendedor(Long idVendedor) {
+        this.idVendedor = idVendedor;
+    }
     
     private Administrador administrador;
 
