@@ -5,11 +5,16 @@
  */
 package client;
 
+import exceptions.ErrorBDException;
+import exceptions.ErrorServerException;
+import java.util.List;
 import java.util.ResourceBundle;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.GenericType;
 import manager.AdministradorManager;
+import modelo.Vendedor;
 
 /**
  * Jersey REST client generated for REST resource:AdministradorFacadeREST
@@ -36,7 +41,7 @@ public class AdministradorRESTClient implements AdministradorManager {
         webTarget = client.target(BASE_URI).path("administrador");
     }
 
-    public <T> T getVendedores(Class<T> responseType) throws ClientErrorException {
+    public <T> T getVendedores(GenericType<T> responseType) throws ClientErrorException {
         WebTarget resource = webTarget;
         resource = resource.path("vendedores");
         return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
@@ -46,7 +51,7 @@ public class AdministradorRESTClient implements AdministradorManager {
         webTarget.request(javax.ws.rs.core.MediaType.APPLICATION_XML).put(javax.ws.rs.client.Entity.entity(requestEntity, javax.ws.rs.core.MediaType.APPLICATION_XML));
     }
 
-    public <T> T getProveedores(Class<T> responseType) throws ClientErrorException {
+    public <T> T getProveedores(GenericType<T> responseType) throws ClientErrorException {
         WebTarget resource = webTarget;
         resource = resource.path("proveedores");
         return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
@@ -68,6 +73,16 @@ public class AdministradorRESTClient implements AdministradorManager {
 
     public void close() {
         client.close();
+    }
+
+    @Override
+    public List<Vendedor> getVendedores() throws ClientErrorException, ErrorBDException, ErrorServerException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public <T> T getProveedores(Class<T> responseType) throws ClientErrorException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }
