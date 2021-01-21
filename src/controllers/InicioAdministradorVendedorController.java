@@ -67,11 +67,12 @@ import static modelo.PrivilegioUsuario.VENDEDOR;
 import modelo.Proveedor;
 import modelo.Usuario;
 import modelo.Vendedor;
+import validar.Validar;
 
 /**
  * FXML Controller class
  *
- * @author Lorena Cáceres Manuel
+ * @author Moroni
  */
 public class InicioAdministradorVendedorController {
 
@@ -232,7 +233,7 @@ public class InicioAdministradorVendedorController {
     
     private void btnAltaVendedorClick(ActionEvent event) {
         try {
-            
+            /*
             LocalDate fechaHoy = LocalDate.now();
             ZoneId defaultZoneId = ZoneId.systemDefault();
             Date date = Date.from(fechaHoy.atStartOfDay(defaultZoneId).toInstant());
@@ -273,8 +274,7 @@ public class InicioAdministradorVendedorController {
             tbVendedores.requestFocus();
             tbVendedores.getSelectionModel().select(row);
             tbVendedores.getFocusModel().focus(row);
-            //}
-/*
+            //}*/
             //Posicion actual
         TablePosition pos = tbVendedores.getFocusModel().getFocusedCell();
         //
@@ -286,7 +286,7 @@ public class InicioAdministradorVendedorController {
         int row = tbVendedores.getItems().size() - 1;
         tbVendedores.getSelectionModel().select(row, pos.getTableColumn());
         tbVendedores.scrollTo(nuevoVendedor);
-            */
+        
         } catch (ClientErrorException ex) {
             Logger.getLogger(InicioAdministradorVendedorController.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -479,10 +479,20 @@ public class InicioAdministradorVendedorController {
         colDni.setOnEditCommit((TableColumn.CellEditEvent<Vendedor, String> data) -> {
             LOG.log(Level.INFO, "Nuevo Dni: {0}", data.getNewValue());
             LOG.log(Level.INFO, "Antiguo Dni: {0}", data.getOldValue());
+            boolean isValidDNI = Validar.isValidDNI(data.getNewValue());
+            if(isValidDNI){
             //Devuelve el dato de la celda
             Vendedor v = data.getRowValue();
             //Añadimos el nuevo valor a la celda
             v.setDni(data.getNewValue());
+            }else{
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setHeaderText(null);
+        alert.setTitle("Administrador");
+        alert.setContentText("El DNI que haz introducido no es valido");
+        Optional<ButtonType> respuesta = alert.showAndWait();
+            }
+            
 
         });
         //Salario del vendedor
