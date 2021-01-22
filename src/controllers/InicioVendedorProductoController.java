@@ -6,6 +6,7 @@
 package controllers;
 
 import implementation.ProductoManagerImplementation;
+import implementation.VendedorManagerImplementacion;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -18,8 +19,11 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ListChangeListener.Change;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
@@ -35,7 +39,9 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TablePosition;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TableView.TableViewSelectionModel;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.ChoiceBoxTableCell;
@@ -53,6 +59,8 @@ import javafx.util.converter.IntegerStringConverter;
 import javax.imageio.ImageIO;
 import modelo.DisponibilidadCell;
 import modelo.Producto;
+import modelo.ProductoCell;
+import modelo.Proveedor;
 import modelo.TipoProducto;
 import modelo.Usuario;
 import validar.Validar;
@@ -107,7 +115,7 @@ public class InicioVendedorProductoController {
     @FXML
     private Button btnBorrar;
 
-    //  private Producto producto;
+    private Producto producto;
     private Usuario usuario;
     private Stage stage = new Stage();
     private static final Logger LOG = Logger.getLogger("controllers.InicioAdministradorProductoController");
@@ -116,7 +124,7 @@ public class InicioVendedorProductoController {
     private ProductoManagerImplementation productoMI;
     private final ObservableList<String> tallas = FXCollections.observableArrayList(
             "XS", "S", "M", "L", "XL", "36", "37", "38", "39", "40", "41", "42", "44", "45", "46");
-
+    private ObservableList<Proveedor> proveedores;
     //LOS PRODUCTOS QUE TENGAN EL MISMO NOMBRE,PROVEEDOR Y TALLA MENSAJE AL USUARIO YA EXISTE Y QUE SOLO ACTUALICE EL PRECIO
     /**
      * Recibe el escenario
@@ -219,9 +227,11 @@ public class InicioVendedorProductoController {
         tvProductos.setEditable(true);
         //actualiza y rellena la tabla con datos del servidor
         productos = (ObservableList<Producto>) getAllProductos();
+
         //for(Producto p:productos)
         //    System.out.println(p.toString());
         manejoTablaProducto();
+        // producto = tvProductos.getSelectionModel().getSelectedItem();
 
     }
 
@@ -280,6 +290,21 @@ public class InicioVendedorProductoController {
         return productoServidor;
 
     }
+        /**
+     * Cargamos todos los proveedores del servidor a nuestra colección
+     */
+    private List<Proveedor> getAllProveedores() {
+        VendedorManagerImplementacion vendedorMI = (VendedorManagerImplementacion) new factory.VendedorFactory().getVendedorManagerImplementacion();
+        ObservableList<Proveedor> vendedorServidor = null;
+        try {
+            vendedorServidor = FXCollections.observableArrayList(vendedorMI.getProveedoresProducto());
+            System.out.println(vendedorServidor.size());
+        } catch (Exception e) {
+            LOG.severe("InicioAdministradorProductoController:getAllProductos");
+        }
+        return vendedorServidor;
+
+    }
 
     /**
      * Cargamos la colección a nuestra tabla
@@ -301,12 +326,15 @@ public class InicioVendedorProductoController {
          */
 
         tcImagen.setCellValueFactory(new PropertyValueFactory<>("imagen"));
-        /*  tcImagen.setCellFactory(new Callback<TableColumn<Producto, byte[]>, TableCell<Producto, byte[]>>() {
+          tcImagen.setCellFactory(new Callback<TableColumn<Producto, byte[]>, TableCell<Producto, byte[]>>() {
            @Override
             public TableCell<Producto, byte[]> call(TableColumn<Producto, byte[]> param) {
-               return new ProductoCell(); //To change body of generated methods, choose Tools | Templates.
+               return new ProductoCell(); 
             }
-        });*/
+        });
+          tcImagen.addEventHandler(TableColumn.<Producto,  byte[]>editCommitEvent(),
+                event -> actualizarImagen(event));
+          
 
  /*
         tcDisponibilidad.setCellFactory(new Callback<TableColumn<Producto, Date>, TableCell<Producto, Date>>() {
@@ -357,13 +385,20 @@ public class InicioVendedorProductoController {
         //Ojito con esto
         tcProveedor.setCellValueFactory(new PropertyValueFactory<>("proveedor"));
         tcProveedor.setCellValueFactory((TableColumn.CellDataFeatures<Producto, String> param) -> new SimpleObjectProperty<>(param.getValue().getProveedor().getEmpresa()));
-        tcProveedor.setOnEditCommit(valor -> {
-            System.out.println("Nuevo : " + valor.getNewValue());
-            System.out.println("Anterior : " + valor.getOldValue());
+      //  tcProveedor.setCellFactory(ChoiceBoxTableCell.
+          //      forTableColumn(proveedores));
+      //  tcProveedor.setCellValueFactory((TableColumn.CellDataFeatures<Producto, String> param) -> new SimpleObjectProperty<>(param.getValue().getProveedor().getEmpresa()));
+        tcProveedor.addEventHandler(TableColumn.<Producto, String>editCommitEvent(),
+                event -> actualizarProveedor(event));
+        
+       // tcProveedor.setCellValueFactory((TableColumn.CellDataFeatures<Producto, String> param) -> new SimpleObjectProperty<>(param.getValue().getProveedor().getEmpresa()));
+      //  tcProveedor.setOnEditCommit(valor -> {
+      //      System.out.println("Nuevo : " + valor.getNewValue());
+      //      System.out.println("Anterior : " + valor.getOldValue());
             //   Reserva reserva = valor.getRowValue();
             //       System.out.println("id de reserva " + reserva.getId());
             //          reserva.setDescripcion(valor.getNewValue());
-        });
+      //  });
 
         //fecha
         tcDisponibilidad.setCellValueFactory(new PropertyValueFactory<>("disponibilidad"));
@@ -408,6 +443,7 @@ public class InicioVendedorProductoController {
                 alert.setTitle("Validación");
                 alert.setHeaderText("El campo talla es incorrecto");
                 alert.showAndWait();
+                tvProductos.refresh();
             }
         } else if (event.getRowValue().getTipo().equals(TipoProducto.ROPA)) {
             actualizandoTalla(event.getRowValue(), event.getNewValue());
@@ -416,8 +452,8 @@ public class InicioVendedorProductoController {
             alert.setTitle("Validación");
             alert.setHeaderText("El campo talla es incorrecto");
             alert.showAndWait();
+            tvProductos.refresh();
         }
-        tvProductos.refresh();
 
     }
 
@@ -667,7 +703,7 @@ public class InicioVendedorProductoController {
     private void actualizarDisponibilidad(TableColumn.CellEditEvent<Producto, Date> event) {
         LocalDate localDate = LocalDate.now();
         Date date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-        if (event.getNewValue().after(date)) {
+        if (date.before(event.getNewValue())) {
             actualizandoDisponibilidad(event.getRowValue(), date);
         } else {
             alert = new Alert(AlertType.ERROR);
@@ -693,5 +729,32 @@ public class InicioVendedorProductoController {
         }
     }
 
+    /**
+     * Metodo que se encargará de las operaciones que se deben realizar cuando
+     * un producto este seleccionado.
+     */
+    private void productoSelecionado() {
+        tvProductos.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
+            @Override
+            public void changed(ObservableValue observableValue, Object oldValue, Object newValue) {
+                //Check whether item is selected and set value of selected item to Label
+                if (tvProductos.getSelectionModel().getSelectedItem() != null) {
+                    TableViewSelectionModel selectionModel = tvProductos.getSelectionModel();
+                    ObservableList selectedCells = selectionModel.getSelectedCells();
+                    TablePosition tablePosition = (TablePosition) selectedCells.get(0);
+                    Object val = tablePosition.getTableColumn().getCellData(newValue);
+                    System.out.println("Selected Value" + val);
+                }
+            }
+        });
+    }
+
+    private void actualizarProveedor(TableColumn.CellEditEvent<Producto, String> event) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    private void actualizarImagen(TableColumn.CellEditEvent<Producto, byte[]> event) {
+      
+    }
 
 }

@@ -6,14 +6,14 @@
 package factory;
 
 import manager.VendedorManager;
-import client.VendedorRESTClient;
+import implementation.VendedorManagerImplementacion;
 
 /**
  *
  * @author 2dam
  */
 public class VendedorFactory {
-    public VendedorManager getVendedorRESTClient (){
-        return new VendedorRESTClient();
+    public VendedorManager getVendedorManagerImplementacion (){
+        return new VendedorManagerImplementacion();
     }
 }

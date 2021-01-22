@@ -5,8 +5,11 @@
  */
 package manager;
 
+import java.util.List;
 import javax.ws.rs.ClientErrorException;
-import javax.ws.rs.client.WebTarget;
+import modelo.Proveedor;
+import modelo.Reserva;
+import modelo.Vendedor;
 
 /**
  *
@@ -16,11 +19,13 @@ public interface VendedorManager {
 
     public void edit(Object requestEntity) throws ClientErrorException;
 
-    public <T> T find(Class<T> responseType, String id) throws ClientErrorException;
+    public Vendedor find(String id) throws ClientErrorException;
 
-    public void create(Object requestEntity) throws ClientErrorException;
+    public void create(Vendedor vendedor) throws ClientErrorException;
 
-    public <T> T findAllReservas(Class<T> responseType) throws ClientErrorException;
+    public List<Reserva> findAllReservas() throws ClientErrorException;
+
+    public List<Proveedor> getProveedoresProducto() throws ClientErrorException;
 
     public void remove(String id) throws ClientErrorException;
 

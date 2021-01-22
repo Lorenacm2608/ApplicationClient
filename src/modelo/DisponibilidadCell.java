@@ -5,7 +5,6 @@
  */
 package modelo;
 
-
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -19,14 +18,16 @@ import javafx.scene.control.TableCell;
  * @author Fredy
  */
 public class DisponibilidadCell extends TableCell<Producto, Date> {
+
     //se crea un objeto DatePicker
     private DatePicker fecha;
-    
+
     public DisponibilidadCell() {
 
     }
+
     /**
-     * 
+     *
      */
 
     @Override
@@ -38,8 +39,9 @@ public class DisponibilidadCell extends TableCell<Producto, Date> {
             setGraphic(fecha);
         }
     }
+
     /**
-     * 
+     *
      */
 
     @Override
@@ -48,41 +50,40 @@ public class DisponibilidadCell extends TableCell<Producto, Date> {
         setText(getDate().toString());
         setGraphic(null);
     }
+
     /**
-     * 
+     *
      * @param item
-     * @param empty 
+     * @param empty
      */
 
     @Override
     public void updateItem(Date item, boolean empty) {
         super.updateItem(item, empty);
-     //   fecha.setDisable(empty || item.toLocalDateTime().toLocalDate().isBefore(LocalDate.now()));
-    //    fecha.setEditable(false);
+        //   fecha.setDisable(empty || item.toLocalDateTime().toLocalDate().isBefore(LocalDate.now()));
+        //    fecha.setEditable(false);
         if (empty) {
             setText(null);
             setGraphic(null);
-            System.out.println("Estoy Aqui 1");
-            
+            // System.out.println("Estoy Aqui 1");
 
         } else {
-           if (isEditing()) {
+            if (isEditing()) {
                 if (fecha != null) {
-                    System.out.println("Estoy Aqui 2");
+                    //      System.out.println("Estoy Aqui 2");
 
                     fecha.setValue(getDate());
                 }
                 setText(null);
                 setGraphic(fecha);
             } else {
-                
-                System.out.println("Estoy Aqui 4");
+
+                //   System.out.println("Estoy Aqui 4");
                 /*   if (LocalDate.now().isAfter(getDate())) {
                         fecha.setDisable(true);
                         System.out.println("Estoy Aqui 3");
                     }*/
                 // fecha.setDisable(false);
-               
                 setText(getDate().format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)));
                 setGraphic(null);
             }
@@ -90,8 +91,9 @@ public class DisponibilidadCell extends TableCell<Producto, Date> {
         }
 
     }
+
     /**
-     * 
+     *
      */
 
     private void createDatePicker() {
@@ -101,18 +103,19 @@ public class DisponibilidadCell extends TableCell<Producto, Date> {
             commitEdit(Date.from(fecha.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant()));
         });
     }
+
     /**
-     * 
-     * @return 
+     *
+     * @return
      */
 
     private LocalDate getDate() {
-        
+
         if (getItem() == null) {
-            System.out.println("Son iguales");
+            //   System.out.println("Son iguales");
             return LocalDate.now();
         } else {
-            System.out.println("Son no lo son");
+            //  System.out.println("Son no lo son");
             return getItem().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
         }
     }

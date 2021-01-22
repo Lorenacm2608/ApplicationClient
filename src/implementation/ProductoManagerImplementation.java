@@ -17,7 +17,7 @@ import modelo.Producto;
 
 /**
  *
- * @author Fredy
+ * @author Fredy Vargas Flores
  */
 public class ProductoManagerImplementation implements ProductoManager {
     
