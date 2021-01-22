@@ -11,21 +11,25 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -49,9 +53,9 @@ import javafx.util.converter.IntegerStringConverter;
 import javax.imageio.ImageIO;
 import modelo.DisponibilidadCell;
 import modelo.Producto;
-import modelo.ProductoCell;
 import modelo.TipoProducto;
 import modelo.Usuario;
+import validar.Validar;
 
 /**
  * FXML Controller class
@@ -103,17 +107,17 @@ public class InicioVendedorProductoController {
     @FXML
     private Button btnBorrar;
 
+    //  private Producto producto;
     private Usuario usuario;
     private Stage stage = new Stage();
     private static final Logger LOG = Logger.getLogger("controllers.InicioAdministradorProductoController");
     private Alert alert;
     private ObservableList<Producto> productos;
     private ProductoManagerImplementation productoMI;
-    private final ObservableList<String> tallN = FXCollections.observableArrayList(
-            "36", "37", "38", "39", "40", "41", "42", "44", "45", "46");
-    private final ObservableList<String> tallaS = FXCollections.observableArrayList(
-            "XS", "S", "M", "L", "XL");
+    private final ObservableList<String> tallas = FXCollections.observableArrayList(
+            "XS", "S", "M", "L", "XL", "36", "37", "38", "39", "40", "41", "42", "44", "45", "46");
 
+    //LOS PRODUCTOS QUE TENGAN EL MISMO NOMBRE,PROVEEDOR Y TALLA MENSAJE AL USUARIO YA EXISTE Y QUE SOLO ACTUALICE EL PRECIO
     /**
      * Recibe el escenario
      *
@@ -159,7 +163,8 @@ public class InicioVendedorProductoController {
         btnNuevo.setTooltip(new Tooltip("Pulse para dar de alta un nuevo producto "));
         btnBorrar.setOnAction(this::btnBorrarClick);
         btnBorrar.setTooltip(new Tooltip("Pulse para borrar el producto selecionado "));
-        //Indicamos las imagenes de los botones
+        tfBuscar.textProperty().addListener(this::tfBuscarChanged);
+//Indicamos las imagenes de los botones
         imagenBotones();
         /* btnCancelar.setOnAction(this::btnCancelarClick);
         btnCancelar.setTooltip(new Tooltip("Pulse para cancelar "));
@@ -187,6 +192,7 @@ public class InicioVendedorProductoController {
      * @param event, WindowEvent
      */
     private void handleWindowClose(WindowEvent event) {
+        /*
         alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setHeaderText(null);
         alert.setTitle("LogIn");
@@ -199,7 +205,7 @@ public class InicioVendedorProductoController {
         } else {
             LOG.log(Level.INFO, "Has pulsado el boton Cancelar");
             event.consume();
-        }
+        }*/
     }
 
     /**
@@ -217,17 +223,6 @@ public class InicioVendedorProductoController {
         //    System.out.println(p.toString());
         manejoTablaProducto();
 
-        /*
-        btnVerificar.setVisible(false);
-        lblCodigoTemporal.setVisible(false);
-        lblNuevaContrasenia.setVisible(false);
-        lblRepetirContrasenia.setVisible(false);
-        pfNuevaContrasenia.setVisible(false);
-        pfRepetirContrasenia.setVisible(false);
-        tfCodigoTemporal.setVisible(false);
-        lblActualizarContrasenia.setVisible(false);
-        hlReenviarCodigo.setVisible(false);
-         */
     }
 
     /**
@@ -277,7 +272,7 @@ public class InicioVendedorProductoController {
         productoMI = (ProductoManagerImplementation) new factory.ProductoFactory().getProductoManagerImplementation();
         ObservableList<Producto> productoServidor = null;
         try {
-           productoServidor = FXCollections.observableArrayList(productoMI.findAllProductosAsc());
+            productoServidor = FXCollections.observableArrayList(productoMI.findAllProductosAsc());
             System.out.println(productoServidor.size());
         } catch (Exception e) {
             LOG.severe("InicioAdministradorProductoController:getAllProductos");
@@ -306,14 +301,14 @@ public class InicioVendedorProductoController {
          */
 
         tcImagen.setCellValueFactory(new PropertyValueFactory<>("imagen"));
-        tcImagen.setCellFactory(new Callback<TableColumn<Producto, byte[]>, TableCell<Producto, byte[]>>() {
+        /*  tcImagen.setCellFactory(new Callback<TableColumn<Producto, byte[]>, TableCell<Producto, byte[]>>() {
            @Override
             public TableCell<Producto, byte[]> call(TableColumn<Producto, byte[]> param) {
                return new ProductoCell(); //To change body of generated methods, choose Tools | Templates.
             }
-        });
+        });*/
 
-        /*
+ /*
         tcDisponibilidad.setCellFactory(new Callback<TableColumn<Producto, Date>, TableCell<Producto, Date>>() {
             @Override
             public TableCell<Producto, Date> call(TableColumn<Producto, Date> arg0) {
@@ -323,33 +318,18 @@ public class InicioVendedorProductoController {
          */
         tcProducto.setCellValueFactory(new PropertyValueFactory<>("modelo"));
         tcProducto.setCellFactory(TextFieldTableCell.forTableColumn());
-        tcProducto.setOnEditCommit(valor -> {
-            System.out.println("Nuevo : " + valor.getNewValue());
-            System.out.println("Anterior : " + valor.getOldValue());
-            //   Reserva reserva = valor.getRowValue();
-            //       System.out.println("id de reserva " + reserva.getId());
-            //          reserva.setDescripcion(valor.getNewValue());
-        });
+        tcProducto.addEventHandler(TableColumn.<Producto, String>editCommitEvent(),
+                event -> actualizarModelo(event));
 
         tcStock.setCellValueFactory(new PropertyValueFactory<>("stock"));
         tcStock.setCellFactory(TextFieldTableCell.<Producto, Integer>forTableColumn(new IntegerStringConverter()));
-        tcStock.setOnEditCommit(valor -> {
-            System.out.println("Nuevo : " + valor.getNewValue());
-            System.out.println("Anterior : " + valor.getOldValue());
-            //   Reserva reserva = valor.getRowValue();
-            //       System.out.println("id de reserva " + reserva.getId());
-            //          reserva.setDescripcion(valor.getNewValue());
-        });
+        tcStock.addEventHandler(TableColumn.<Producto, Integer>editCommitEvent(),
+                event -> actualizarStock(event));
 
         tcPrecio.setCellValueFactory(new PropertyValueFactory<>("precio"));
         tcPrecio.setCellFactory(TextFieldTableCell.<Producto, Float>forTableColumn(new FloatStringConverter()));
-        tcPrecio.setOnEditCommit(valor -> {
-            System.out.println("Nuevo : " + valor.getNewValue());
-            System.out.println("Anterior : " + valor.getOldValue());
-            //   Reserva reserva = valor.getRowValue();
-            //       System.out.println("id de reserva " + reserva.getId());
-            //          reserva.setDescripcion(valor.getNewValue());
-        });
+        tcPrecio.addEventHandler(TableColumn.<Producto, Float>editCommitEvent(),
+                event -> actualizarPrecio(event));
 
         //choicebox
         tcTipo.setCellValueFactory(new PropertyValueFactory<>("tipo"));
@@ -357,31 +337,22 @@ public class InicioVendedorProductoController {
                 forTableColumn(TipoProducto.ROPA, TipoProducto.ZAPATILLAS));
         tcTipo.addEventHandler(TableColumn.<Producto, TipoProducto>editCommitEvent(),
                 event -> actualizarTipoRopa(event));
+        /*
+        tcEstado.addEventHandler(TableColumn.<Reserva, EstadoReserva>editCommitEvent(),
+                    event -> actualizarReservaEstado(event));
+         */
 
         //choicebox
         tcTalla.setCellValueFactory(new PropertyValueFactory<>("talla"));
         tcTalla.setCellFactory(ChoiceBoxTableCell.
-                forTableColumn("36", "37", "38", "39", "40", "41", "42", "44", "45", "46", "XS", "S", "M", "L", "XL"));
+                forTableColumn(tallas));
         tcTalla.addEventHandler(TableColumn.<Producto, String>editCommitEvent(),
                 event -> actualizarTalla(event));
-        /*
-        https://coderanch.com/t/703498/java/Tableview-show-combobox-edit
-        setCellFactory(ComboBoxTableCell.forTableColumn(radioList));
-        columnRadiopharmaceutical.setOnEditCommit(t ->{
-            t.getRowValue().setRadiopharmaceutical(t.getNewValue());
-            columnSupplier.getTableView().requestFocus();
-            addTabl
-         */
 
         tcDescripcion.setCellValueFactory(new PropertyValueFactory<>("descripcion"));
         tcDescripcion.setCellFactory(TextFieldTableCell.forTableColumn());
-        tcDescripcion.setOnEditCommit(valor -> {
-            System.out.println("Nuevo : " + valor.getNewValue());
-            System.out.println("Anterior : " + valor.getOldValue());
-            //   Reserva reserva = valor.getRowValue();
-            //       System.out.println("id de reserva " + reserva.getId());
-            //          reserva.setDescripcion(valor.getNewValue());
-        });
+        tcDescripcion.addEventHandler(TableColumn.<Producto, String>editCommitEvent(),
+                event -> actualizarDescripcion(event));
 
         //Ojito con esto
         tcProveedor.setCellValueFactory(new PropertyValueFactory<>("proveedor"));
@@ -402,22 +373,19 @@ public class InicioVendedorProductoController {
                 return new DisponibilidadCell();
             }
         });
-        tcDisponibilidad.setOnEditCommit(value -> {
-            System.out.println("Nuevo : " + value.getNewValue());
-            System.out.println("Anterior : " + value.getOldValue());
-            Producto producto = value.getRowValue();
-            System.out.println("id de reserva " + producto.getId());
-            producto.setDisponibilidad(value.getNewValue());
-        });
+        tcDisponibilidad.addEventHandler(TableColumn.<Producto, Date>editCommitEvent(),
+                event -> actualizarDisponibilidad(event));
 
         tvProductos.setItems(productos);
 
     }
 
     private void actualizarTipoRopa(TableColumn.CellEditEvent<Producto, TipoProducto> event) {
+
         System.out.println("Estoy aca la reserva es " + event);
         System.out.println((TipoProducto) event.getNewValue());
         System.out.println((TipoProducto) event.getOldValue());
+
         //   Reserva reserva = event.getRowValue();
         //  EstadoReserva estado = event.getNewValue();
         //  System.out.println("Estado: " + estado.toString() + reserva.getId() + reserva.getDescripcion() + "Esto es de reserva: " + reserva.getEstado().toString());
@@ -425,15 +393,47 @@ public class InicioVendedorProductoController {
         //   System.out.println(reserva.getId() + reserva.getDescripcion() + "Esto es de reserva: " + reserva.getEstado().toString()+" fecha de entrega es "+reserva.getFechaEntrega());
     }
 
+    /**
+     * Comprueba que los campos sean correctos
+     *
+     * @param event
+     */
     private void actualizarTalla(TableColumn.CellEditEvent<Producto, String> event) {
-        System.out.println("Estoy aca la reserva es " + event);
-        System.out.println(event.getNewValue());
-        System.out.println(event.getOldValue());
-        //   Reserva reserva = event.getRowValue();
-        //  EstadoReserva estado = event.getNewValue();
-        //  System.out.println("Estado: " + estado.toString() + reserva.getId() + reserva.getDescripcion() + "Esto es de reserva: " + reserva.getEstado().toString());
-        //  reserva.setEstado(event.getNewValue());
-        //   System.out.println(reserva.getId() + reserva.getDescripcion() + "Esto es de reserva: " + reserva.getEstado().toString()+" fecha de entrega es "+reserva.getFechaEntrega());
+        // Producto producto = event.getRowValue();
+        if (Validar.isNumber(event.getNewValue())) {
+            if (event.getRowValue().getTipo().equals(TipoProducto.ZAPATILLAS)) {
+                actualizandoTalla(event.getRowValue(), event.getNewValue());
+            } else {
+                alert = new Alert(AlertType.ERROR);
+                alert.setTitle("Validación");
+                alert.setHeaderText("El campo talla es incorrecto");
+                alert.showAndWait();
+            }
+        } else if (event.getRowValue().getTipo().equals(TipoProducto.ROPA)) {
+            actualizandoTalla(event.getRowValue(), event.getNewValue());
+        } else {
+            alert = new Alert(AlertType.ERROR);
+            alert.setTitle("Validación");
+            alert.setHeaderText("El campo talla es incorrecto");
+            alert.showAndWait();
+        }
+        tvProductos.refresh();
+
+    }
+
+    /**
+     * Actualiza el producto en el servidor
+     *
+     * @param producto
+     * @param talla
+     */
+    private void actualizandoTalla(Producto producto, String talla) {
+        try {
+            producto.setTalla(talla);
+            productoMI.edit(producto);
+        } catch (Exception e) {
+
+        }
     }
 
     public byte[] extractBytes(String path) {
@@ -450,8 +450,8 @@ public class InicioVendedorProductoController {
         }
         return (baos.toByteArray());
     }
-    
-        //CONFIGURACIÓN DE IMAGENES 
+
+    //CONFIGURACIÓN DE IMAGENES 
     /**
      * Añade las imagenes de los botones
      */
@@ -469,4 +469,229 @@ public class InicioVendedorProductoController {
         btnBorrar.setGraphic(new ImageView(imageBorrar));
 
     }
+
+    /**
+     * valida y actualiza el campo modelo de producto
+     *
+     * @param event
+     */
+    private void actualizarModelo(TableColumn.CellEditEvent<Producto, String> event) {
+
+        if (Validar.longitudCadenaSinEspacio(event.getNewValue()) > 3) {
+            if (Validar.isValidCadena(event.getNewValue())) {
+                actualizandoModelo(event.getRowValue(), event.getNewValue());
+            } else {
+                alert = new Alert(AlertType.ERROR);
+                alert.setTitle("Validación");
+                alert.setHeaderText("El campo producto tiene carateres extraños");
+                alert.showAndWait();
+            }
+
+        } else {
+            alert = new Alert(AlertType.ERROR);
+            alert.setTitle("Validación");
+            alert.setHeaderText("El campo producto es demasiado corto");
+            alert.showAndWait();
+        }
+        tvProductos.refresh();
+    }
+
+    /**
+     * Actualiza el campo modelo del producto
+     *
+     * @param producto
+     * @param modelo
+     */
+    private void actualizandoModelo(Producto producto, String modelo) {
+        try {
+            producto.setModelo(modelo);
+            productoMI.edit(producto);
+        } catch (Exception e) {
+        }
+    }
+
+    /**
+     * Valida y actualiza el campo stock
+     *
+     * @param event
+     */
+    private void actualizarStock(TableColumn.CellEditEvent<Producto, Integer> event) {
+
+        if (Validar.isNumber(event.getNewValue().toString())) {
+            if (event.getNewValue() >= 0) {
+                actualizandoStock(event.getRowValue(), event.getNewValue());
+            } else {
+                alert = new Alert(AlertType.ERROR);
+                alert.setTitle("Validación");
+                alert.setHeaderText("El campo stock no puede ser un número menor a cero");
+                alert.showAndWait();
+            }
+        } else {
+            alert = new Alert(AlertType.ERROR);
+            alert.setTitle("Validación");
+            alert.setHeaderText("El campo stock tiene que ser un número");
+            alert.showAndWait();
+        }
+        tvProductos.refresh();
+    }
+
+    /**
+     * Actualiza el campo stock del producto
+     *
+     * @param producto
+     * @param stock
+     */
+    private void actualizandoStock(Producto producto, Integer stock) {
+        try {
+            producto.setStock(stock);
+            productoMI.edit(producto);
+        } catch (Exception e) {
+        }
+    }
+
+    /**
+     * Valida y actualiza el precio del producto
+     *
+     * @param event
+     */
+    private void actualizarPrecio(TableColumn.CellEditEvent<Producto, Float> event) {
+        if (Validar.isNumberFloat(event.getNewValue().toString())) {
+            if (event.getNewValue() >= 0) {
+                actualizandoPrecio(event.getRowValue(), event.getNewValue());
+            } else {
+                alert = new Alert(AlertType.ERROR);
+                alert.setTitle("Validación");
+                alert.setHeaderText("El campo precio no puede ser un número menor a cero");
+                alert.showAndWait();
+            }
+        } else {
+            alert = new Alert(AlertType.ERROR);
+            alert.setTitle("Validación");
+            alert.setHeaderText("El campo precio tiene que ser un número");
+            alert.showAndWait();
+
+        }
+        tvProductos.refresh();
+    }
+
+    /**
+     * Actualiza el campo precio del producto
+     *
+     * @param producto
+     * @param precio
+     */
+    private void actualizandoPrecio(Producto producto, Float precio) {
+        try {
+            producto.setPrecio(precio);
+            productoMI.edit(producto);
+        } catch (Exception e) {
+        }
+    }
+
+    /**
+     * Valida y actualiza la descripcion
+     *
+     * @param event
+     */
+    private void actualizarDescripcion(TableColumn.CellEditEvent<Producto, String> event) {
+
+        if (Validar.isValidCadena(event.getNewValue())) {
+            if (Validar.longitudCadenaSinEspacio(event.getNewValue()) > 5) {
+                actualizandoDescripcion(event.getRowValue(), event.getNewValue());
+            } else {
+                alert = new Alert(AlertType.ERROR);
+                alert.setTitle("Validación");
+                alert.setHeaderText("El campo descripción es demasiado corto");
+                alert.showAndWait();
+
+            }
+
+        } else {
+            alert = new Alert(AlertType.ERROR);
+            alert.setTitle("Validación");
+            alert.setHeaderText("El campo descripción tiene carateres extraños");
+            alert.showAndWait();
+            tvProductos.refresh();
+        }
+    }
+
+    /**
+     * Actualiza la descripción del producto
+     *
+     * @param producto
+     * @param descripcion
+     */
+    private void actualizandoDescripcion(Producto producto, String descripcion) {
+        try {
+            producto.setDescripcion(descripcion);
+            productoMI.edit(producto);
+
+        } catch (Exception e) {
+
+        }
+    }
+
+    /**
+     * Realizará la búqueda por referncia(id) ó por producto
+     *
+     * @param observable
+     * @param oldValue
+     * @param newValue
+     */
+    private void tfBuscarChanged(ObservableValue observable, String oldValue, String newValue) {
+        FilteredList<Producto> filtrado = new FilteredList<>(productos, (Producto p) -> true);
+        filtrado.setPredicate(producto -> {
+            if (newValue == null || newValue.isEmpty()) {
+                return true;
+            }
+            String minuscula = newValue.toLowerCase();
+            if (Validar.isNumber(newValue)) {
+                if (producto.getId().toString().toLowerCase().contains(minuscula)) {
+                    return true;
+                }
+            } else if (producto.getModelo().toLowerCase().contains(minuscula)) {
+                return true;
+            }
+            return false;
+        });
+        SortedList<Producto> productosFiltrados = new SortedList<>(filtrado);
+        productosFiltrados.comparatorProperty().bind(tvProductos.comparatorProperty());
+        tvProductos.setItems(productosFiltrados);
+    }
+
+    /**
+     * validará y actualizará la disponibilidad
+     *
+     * @param event
+     */
+    private void actualizarDisponibilidad(TableColumn.CellEditEvent<Producto, Date> event) {
+        LocalDate localDate = LocalDate.now();
+        Date date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        if (event.getNewValue().after(date)) {
+            actualizandoDisponibilidad(event.getRowValue(), date);
+        } else {
+            alert = new Alert(AlertType.ERROR);
+            alert.setTitle("Validación");
+            alert.setHeaderText("la fecha no puede ser menor a la de hoy");
+            alert.showAndWait();
+        }
+    }
+
+    /**
+     * Actualiza la fecha de disponibilidad
+     *
+     * @param producto
+     * @param date
+     */
+    private void actualizandoDisponibilidad(Producto producto, Date date) {
+        try {
+            producto.setDisponibilidad(date);
+            productoMI.edit(producto);
+
+        } catch (Exception e) {
+
+        }
+    }
+
+
 }

@@ -8,6 +8,7 @@ package validar;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 
+
 /**
  *
  * @author Nadir Essadi
@@ -152,7 +153,7 @@ public class Validar {
      */
     public static boolean isValidPatternContrasena(PasswordField txtContrasena) {
         boolean b = false;
-        String pattern ="^[a-zA-Z0-9*@.,_-]+$";
+        String pattern = "^[a-zA-Z0-9*@.,_-]+$";
         if (txtContrasena.getText().matches(pattern)) {
             b = true;
             txtContrasena.setStyle("-fx-border-color:rgb(189 189 189);");
@@ -160,5 +161,57 @@ public class Validar {
             txtContrasena.setStyle("-fx-border-color:red; -fx-border-width:2px;");
         }
         return b;
+    }
+
+    /**
+     * Comprueba si el string ingresado es un número
+     *
+     * @param cadena
+     * @return true or false
+     */
+    public static boolean isNumber(String cadena) {
+        try {
+            Integer.valueOf(cadena);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+    /**
+     * Comprueba si el string ingresado es un float
+     * @param cadena
+     * @return 
+     */
+        public static boolean isNumberFloat(String cadena) {
+        try {
+            Float.valueOf(cadena);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Devuelve el tamaño de la cadena sin espacios
+     *
+     * @param cadena
+     * @return longitud
+     */
+    public static int longitudCadenaSinEspacio(String cadena) {
+        return (cadena.replaceAll(" ", "").length());
+    }
+
+    /**
+     * Validar que la cadena no tenga caracteres extraños
+     *
+     * @param cadena
+     * @return true or false
+     */
+    public static boolean isValidCadena(String cadena) {
+        String pattern = "^[a-zA-Z0-9ñÑáéíóúÁÉÍÓÚ]+$";
+        if (!cadena.matches(pattern)) {
+            return false;
+        }
+        return true;
     }
 }

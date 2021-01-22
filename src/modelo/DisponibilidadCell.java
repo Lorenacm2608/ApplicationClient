@@ -19,12 +19,15 @@ import javafx.scene.control.TableCell;
  * @author Fredy
  */
 public class DisponibilidadCell extends TableCell<Producto, Date> {
-
+    //se crea un objeto DatePicker
     private DatePicker fecha;
     
     public DisponibilidadCell() {
 
     }
+    /**
+     * 
+     */
 
     @Override
     public void startEdit() {
@@ -35,6 +38,9 @@ public class DisponibilidadCell extends TableCell<Producto, Date> {
             setGraphic(fecha);
         }
     }
+    /**
+     * 
+     */
 
     @Override
     public void cancelEdit() {
@@ -42,6 +48,11 @@ public class DisponibilidadCell extends TableCell<Producto, Date> {
         setText(getDate().toString());
         setGraphic(null);
     }
+    /**
+     * 
+     * @param item
+     * @param empty 
+     */
 
     @Override
     public void updateItem(Date item, boolean empty) {
@@ -79,20 +90,29 @@ public class DisponibilidadCell extends TableCell<Producto, Date> {
         }
 
     }
+    /**
+     * 
+     */
 
     private void createDatePicker() {
-
         fecha = new DatePicker(getDate());
         fecha.setMinWidth(this.getWidth() - this.getGraphicTextGap() * 2);
         fecha.setOnAction((value) -> {
             commitEdit(Date.from(fecha.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant()));
         });
     }
+    /**
+     * 
+     * @return 
+     */
 
     private LocalDate getDate() {
+        
         if (getItem() == null) {
+            System.out.println("Son iguales");
             return LocalDate.now();
         } else {
+            System.out.println("Son no lo son");
             return getItem().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
         }
     }
