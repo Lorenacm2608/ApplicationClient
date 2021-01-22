@@ -8,6 +8,8 @@ package manager;
 import exceptions.ErrorBDException;
 import exceptions.ErrorServerException;
 import exceptions.InsertException;
+import exceptions.UpdateException;
+import exceptions.VendedorNotFoundException;
 import exceptions.VendedorYaExisteException;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.client.WebTarget;
@@ -19,7 +21,7 @@ import modelo.Vendedor;
  */
 public interface VendedorManager {
 
-    public void edit(Object requestEntity) throws ClientErrorException;
+    public void edit(Vendedor vendedor) throws ClientErrorException, UpdateException, ErrorBDException, ErrorServerException, VendedorNotFoundException;
 
     public <T> T find(Class<T> responseType, String id) throws ClientErrorException;
 

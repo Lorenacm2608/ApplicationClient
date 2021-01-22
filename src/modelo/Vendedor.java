@@ -10,9 +10,6 @@ import javax.xml.bind.annotation.XmlTransient;
  */
 @XmlRootElement
 public class Vendedor extends Usuario implements Serializable {
-
-    //id del vendedor
-    private Long idVendedor;
     
     private Administrador administrador;
     
@@ -48,16 +45,6 @@ public class Vendedor extends Usuario implements Serializable {
     public Vendedor(){
         
     }
-
-    public Long getIdVendedor() {
-        return idVendedor;
-    }
-
-    public void setIdVendedor(Long idVendedor) {
-        this.idVendedor = idVendedor;
-    }
-    
-    
 
     private static final long serialVersionUID = 1L;
 

@@ -270,7 +270,7 @@ public class InicioAdministradorVendedorController {
             vendedorManager = (VendedorManagerImplementation) new factory.VendedorFactory().getVendedorManagerImplementation();
             try {
                 //Añadimos en nuevo vendedor dentro del listvendedores (ObservableList)
-            listvendedores.add(nuevoVendedor);
+            
             int row = listvendedores.size() - 1;
             // Seleccionamos la nueva fila
             tbVendedores.requestFocus();
@@ -278,6 +278,7 @@ public class InicioAdministradorVendedorController {
             tbVendedores.getFocusModel().focus(row);
                 //Llamamos al método create para asi poder crear un nuevo vendedor
                 vendedorManager.create(nuevoVendedor);
+                datosTabla();
             } catch (InsertException ex) {
                 Logger.getLogger(InicioAdministradorVendedorController.class.getName()).log(Level.SEVERE, null, ex);
             } catch (VendedorYaExisteException ex) {
@@ -330,7 +331,7 @@ public class InicioAdministradorVendedorController {
                     //Implementación del VendedorRESTClient
                     vendedorManager = (VendedorManagerImplementation) new factory.VendedorFactory().getVendedorManagerImplementation();
                     //Llamamos al método remove para asi poder eliminar el vendedor que está seleccionado
-                    vendedorManager.remove(tbVendedores.getSelectionModel().getSelectedItem().getIdVendedor().toString());
+                    vendedorManager.remove(tbVendedores.getSelectionModel().getSelectedItem().getId_usuario().toString());
                     //Mostramos los datos actualizados en la tabla
                     datosTabla();
                     LOG.log(Level.INFO, "Se ha borrado un vendedor");
@@ -389,12 +390,44 @@ public class InicioAdministradorVendedorController {
         colUsuario.setCellFactory(TextFieldTableCell.forTableColumn());
         //Aceptamos la edición de la celda de la columna descripción 
         colUsuario.setOnEditCommit((TableColumn.CellEditEvent<Vendedor, String> data) -> {
-            LOG.log(Level.INFO, "Nuevo Usuario: {0}", data.getNewValue());
-            LOG.log(Level.INFO, "Antiguo Usuario: {0}", data.getOldValue());
-            //Devuelve el dato de la celda
-            Vendedor v = data.getRowValue();
-            //Añadimos el nuevo valor a la celda
-            v.setLogin(data.getNewValue());
+            //Establecemos que el dato que se introduzca en la celda debe cumplir un patrón
+                    if (!Pattern.matches("^[a-zA-Z0-9ñÑáéíóúÁÉÍÓÚ\\s]+$", data.getNewValue())
+                    || data.getNewValue().equalsIgnoreCase("")) {
+                        //En el caso de que no se cumpla el patrón. Saldrá un alerta informandonos del error
+                        alert = new Alert(AlertType.ERROR);
+                        alert.setTitle("Proveedor");
+                        alert.setHeaderText("Error al introducir la descripción");
+                        alert.setContentText("Introduzca un caracter válido");
+
+                        alert.showAndWait();
+                        tbVendedores.refresh();
+                    } else {
+                            LOG.log(Level.INFO, "Nuevo Usuario: {0}", data.getNewValue());
+                            LOG.log(Level.INFO, "Antiguo Usuario: {0}", data.getOldValue());
+                            //Implementación del ProveedorRESTClient
+                            vendedorManager = (VendedorManagerImplementation) new factory.VendedorFactory().getVendedorManagerImplementation();
+                            //Devuelve el dato de la fila
+                            Vendedor v = data.getRowValue();
+                            //Añadimos el nuevo valor a la fila
+                            v.setLogin(data.getNewValue());
+                                try {
+                                    //Llamamos al método edit para asi poder modificar la descripción del proveedor
+                                    vendedorManager.edit(v);
+                                    //Mostramos los datos actualizados en la TableView
+                                    datosTabla();
+                                } catch (ClientErrorException ex) {
+                                    Logger.getLogger(InicioAdministradorVendedorController.class.getName()).log(Level.SEVERE, null, ex);
+                                } catch (UpdateException ex) {
+                                    Logger.getLogger(InicioAdministradorVendedorController.class.getName()).log(Level.SEVERE, null, ex);
+                                } catch (ErrorBDException ex) {
+                                    Logger.getLogger(InicioAdministradorVendedorController.class.getName()).log(Level.SEVERE, null, ex);
+                                } catch (ErrorServerException ex) {
+                                    Logger.getLogger(InicioAdministradorVendedorController.class.getName()).log(Level.SEVERE, null, ex);
+                                }catch (VendedorNotFoundException ex) {
+                                    Logger.getLogger(InicioAdministradorVendedorController.class.getName()).log(Level.SEVERE, null, ex);
+                                }
+                            }
+                            
         });
         //Email del vendedor
         colEmail.setCellValueFactory(new PropertyValueFactory<>("email"));
@@ -402,13 +435,63 @@ public class InicioAdministradorVendedorController {
         colEmail.setCellFactory(TextFieldTableCell.forTableColumn());
         //Aceptamos la edición de la celda de la columna email
         colEmail.setOnEditCommit((TableColumn.CellEditEvent<Vendedor, String> data) -> {
-            LOG.log(Level.INFO, "Nuevo Email: {0}", data.getNewValue());
-            LOG.log(Level.INFO, "Antiguo Email: {0}", data.getOldValue());
-            //Devuelve el dato de la celda
-            Vendedor v = data.getRowValue();
-            //Añadimos el nuevo valor a la celda
-            v.setEmail(data.getNewValue());
+            //Establecemos que el dato que se introduzca en la celda debe cumplir un patrón
+            if (!Pattern.matches("\\w+([-+.']\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*", data.getNewValue())
+                    || data.getNewValue().equalsIgnoreCase("")) {
+                //En el caso de que no se cumpla el patrón. Saldrá un alerta informandonos del error
+                alert = new Alert(AlertType.ERROR);
+                alert.setTitle("Vendedor");
+                alert.setHeaderText("Error al introducir el email");
+                alert.setContentText("Introduzca un caracter válido");
 
+                alert.showAndWait();
+                tbVendedores.refresh();
+            } else {
+                try {
+                    LOG.log(Level.INFO, "Nuevo Email: {0}", data.getNewValue());
+                    LOG.log(Level.INFO, "Antiguo Email: {0}", data.getOldValue());
+                    //Implementación del ProveedorRESTClient
+                    vendedorManager = (VendedorManagerImplementation) new factory.VendedorFactory().getVendedorManagerImplementation();
+                    //Devuelve el dato de la fila
+                    Vendedor v = data.getRowValue();
+                    //Añadimos el nuevo valor a la fila
+                    v.setEmail(data.getNewValue());
+                    //Llamamos al método edit para asi poder modificar el email del proveedor
+                    vendedorManager.edit(v);
+                    //Mostramos los datos actualizados en la TableView
+                    datosTabla();
+                } catch (ClientErrorException ex) {
+                    LOG.log(Level.SEVERE, "ClientErrorException");
+                    alert = new Alert(AlertType.ERROR);
+                    alert.setTitle("Administrador");
+                    alert.setHeaderText("Imposible conectar. Inténtelo más tarde");
+                    alert.showAndWait();
+                } catch (UpdateException ex) {
+                    LOG.log(Level.SEVERE, "UpdateException");
+                    alert = new Alert(AlertType.ERROR);
+                    alert.setTitle("Administrador");
+                    alert.setHeaderText("Imposible conectar. Inténtelo más tarde");
+                    alert.showAndWait();
+                } catch (ErrorBDException ex) {
+                    LOG.log(Level.SEVERE, "ErrorBDException");
+                    alert = new Alert(AlertType.ERROR);
+                    alert.setTitle("Administrador");
+                    alert.setHeaderText("Imposible conectar. Inténtelo más tarde");
+                    alert.showAndWait();
+                } catch (ErrorServerException ex) {
+                    LOG.log(Level.SEVERE, "ErrorServerException");
+                    alert = new Alert(AlertType.ERROR);
+                    alert.setTitle("Administrador");
+                    alert.setHeaderText("Imposible conectar. Inténtelo más tarde");
+                    alert.showAndWait();
+                } catch (VendedorNotFoundException ex) {
+                    LOG.log(Level.SEVERE, "VendedorNotFoundException");
+                    alert = new Alert(AlertType.ERROR);
+                    alert.setTitle("Administrador");
+                    alert.setHeaderText("No se ha podido encontrar el proveedor");
+                    alert.showAndWait();
+                }
+            }
         });
         //Nombre del vendedor 
         colNombre.setCellValueFactory(new PropertyValueFactory<>("fullname"));
@@ -427,7 +510,6 @@ public class InicioAdministradorVendedorController {
                 alert.showAndWait();
                 tbVendedores.refresh();
             } else {
-                try {
                     LOG.log(Level.INFO, "Nuevo Nombre: {0}", data.getNewValue());
                     LOG.log(Level.INFO, "Antiguo Nombre: {0}", data.getOldValue());
                     //Implementacion del VendedorRESTClient
@@ -436,18 +518,22 @@ public class InicioAdministradorVendedorController {
                     Vendedor v = data.getRowValue();
                     //Añadimos el nuevo valor a la fila
                     v.setFullname(data.getNewValue());
-                    //Llamamos al método edit para asi poder modificar el nombre del vendedor
-                    vendedorManager.edit(v);
-                    //Mostramos los datos actualizados en la TableView
+                    try {
+                        //Llamamos al método edit para asi poder modificar el nombre del vendedor
+                        vendedorManager.edit(v);
+                        //Mostramos los datos actualizados en la TableView
                     datosTabla();
-                } catch (ClientErrorException ex) {
-                    LOG.log(Level.SEVERE, "ClientErrorException");
-                    alert = new Alert(AlertType.ERROR);
-                    alert.setTitle("Administrador");
-                    alert.setHeaderText("Imposible conectar. Inténtelo más tarde");
-                    alert.showAndWait();
+                    } catch (UpdateException ex) {
+                        Logger.getLogger(InicioAdministradorVendedorController.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (ErrorBDException ex) {
+                        Logger.getLogger(InicioAdministradorVendedorController.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (ErrorServerException ex) {
+                        Logger.getLogger(InicioAdministradorVendedorController.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (VendedorNotFoundException ex) {
+                        Logger.getLogger(InicioAdministradorVendedorController.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    
                 }
-            }
         });
         //Estado del vendedor
         colEstado.setCellValueFactory(new PropertyValueFactory<>("status"));
@@ -465,13 +551,40 @@ public class InicioAdministradorVendedorController {
         colDireccion.setCellFactory(TextFieldTableCell.forTableColumn());
         //Aceptamos la edición de la celda de la columna direccion
         colDireccion.setOnEditCommit((TableColumn.CellEditEvent<Vendedor, String> data) -> {
-            LOG.log(Level.INFO, "Nueva Direccion: {0}", data.getNewValue());
-            LOG.log(Level.INFO, "Antigua Direccion: {0}", data.getOldValue());
-            //Devuelve el dato de la celda
-            Vendedor v = data.getRowValue();
-            //Añadimos el nuevo valor a la celda
-            v.setDireccion(data.getNewValue());
+            if (!Pattern.matches("^[a-zA-Z0-9ñÑáéíóúÁÉÍÓÚ\\s]+$", data.getNewValue())
+                    || data.getNewValue().equalsIgnoreCase("")) {
+                //En el caso de que no se cumpla el patrón. Saldrá un alerta informandonos del error
+                alert = new Alert(AlertType.ERROR);
+                alert.setTitle("Vendedor");
+                alert.setHeaderText("Error al introducir la direccion del vendedor");
+                alert.setContentText("Introduzca un caracter válido");
 
+                alert.showAndWait();
+                tbVendedores.refresh();
+            } else {
+                    LOG.log(Level.INFO, "Nueva Direccion: {0}", data.getNewValue());
+                    LOG.log(Level.INFO, "Antigua Direccion: {0}", data.getOldValue());
+                    //Implementacion del VendedorRESTClient
+                    vendedorManager = (VendedorManagerImplementation) new factory.VendedorFactory().getVendedorManagerImplementation();
+                    //Devuelve el dato de la fila
+                    Vendedor v = data.getRowValue();
+                    //Añadimos el nuevo valor a la fila
+                    v.setDireccion(data.getNewValue());
+                    try {
+                        //Llamamos al método edit para asi poder modificar el nombre del vendedor
+                        vendedorManager.edit(v);
+                        //Mostramos los datos actualizados en la TableView
+                    datosTabla();
+                    } catch (UpdateException ex) {
+                        Logger.getLogger(InicioAdministradorVendedorController.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (ErrorBDException ex) {
+                        Logger.getLogger(InicioAdministradorVendedorController.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (ErrorServerException ex) {
+                        Logger.getLogger(InicioAdministradorVendedorController.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (VendedorNotFoundException ex) {
+                        Logger.getLogger(InicioAdministradorVendedorController.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+            }
         });
         //Telefono del vendedor
         colTelefono.setCellValueFactory(new PropertyValueFactory<>("telefono"));
@@ -481,11 +594,26 @@ public class InicioAdministradorVendedorController {
         colTelefono.setOnEditCommit((TableColumn.CellEditEvent<Vendedor, Integer> data) -> {
             LOG.log(Level.INFO, "Nuevo Telefono: {0}", data.getNewValue());
             LOG.log(Level.INFO, "Antiguo Telefono: {0}", data.getOldValue());
-            //Devuelve el dato de la celda
-            Vendedor v = data.getRowValue();
-            //Añadimos el nuevo valor a la celda
-            v.setTelefono(data.getNewValue());
-
+            //Implementacion del VendedorRESTClient
+                    vendedorManager = (VendedorManagerImplementation) new factory.VendedorFactory().getVendedorManagerImplementation();
+                    //Devuelve el dato de la fila
+                    Vendedor v = data.getRowValue();
+                    //Añadimos el nuevo valor a la fila
+                    v.setTelefono(data.getNewValue());
+                    try {
+                        //Llamamos al método edit para asi poder modificar el nombre del vendedor
+                        vendedorManager.edit(v);
+                        //Mostramos los datos actualizados en la TableView
+                    datosTabla();
+                    } catch (UpdateException ex) {
+                        Logger.getLogger(InicioAdministradorVendedorController.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (ErrorBDException ex) {
+                        Logger.getLogger(InicioAdministradorVendedorController.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (ErrorServerException ex) {
+                        Logger.getLogger(InicioAdministradorVendedorController.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (VendedorNotFoundException ex) {
+                        Logger.getLogger(InicioAdministradorVendedorController.class.getName()).log(Level.SEVERE, null, ex);
+                    }
         });
         //Dni del vendedor
         colDni.setCellValueFactory(new PropertyValueFactory<>("dni"));
@@ -495,12 +623,29 @@ public class InicioAdministradorVendedorController {
         colDni.setOnEditCommit((TableColumn.CellEditEvent<Vendedor, String> data) -> {
             LOG.log(Level.INFO, "Nuevo Dni: {0}", data.getNewValue());
             LOG.log(Level.INFO, "Antiguo Dni: {0}", data.getOldValue());
+            //Implementacion del VendedorRESTClient
+                    vendedorManager = (VendedorManagerImplementation) new factory.VendedorFactory().getVendedorManagerImplementation();
+                    //Devuelve el dato de la fila
+                    Vendedor v = data.getRowValue();
+                    //Añadimos el nuevo valor a la fila
+                    v.setDni(data.getNewValue());
+                    
             boolean isValidDNI = Validar.isValidDNI(data.getNewValue());
             if(isValidDNI){
-            //Devuelve el dato de la celda
-            Vendedor v = data.getRowValue();
-            //Añadimos el nuevo valor a la celda
-            v.setDni(data.getNewValue());
+            try {
+                        //Llamamos al método edit para asi poder modificar el nombre del vendedor
+                        vendedorManager.edit(v);
+                        //Mostramos los datos actualizados en la TableView
+                    datosTabla();
+                    } catch (UpdateException ex) {
+                        Logger.getLogger(InicioAdministradorVendedorController.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (ErrorBDException ex) {
+                        Logger.getLogger(InicioAdministradorVendedorController.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (ErrorServerException ex) {
+                        Logger.getLogger(InicioAdministradorVendedorController.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (VendedorNotFoundException ex) {
+                        Logger.getLogger(InicioAdministradorVendedorController.class.getName()).log(Level.SEVERE, null, ex);
+                    }
             }else{
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setHeaderText(null);
@@ -519,11 +664,26 @@ public class InicioAdministradorVendedorController {
         colSalario.setOnEditCommit((TableColumn.CellEditEvent<Vendedor, Integer> data) -> {
             LOG.log(Level.INFO, "Nuevo Salario: {0}", data.getNewValue());
             LOG.log(Level.INFO, "Antiguo Salario: {0}", data.getOldValue());
-            //Devuelve el dato de la celda
-            Vendedor v = data.getRowValue();
-            //Añadimos el nuevo valor a la celda
-            v.setSalario(data.getNewValue());
-
+            //Implementacion del VendedorRESTClient
+                    vendedorManager = (VendedorManagerImplementation) new factory.VendedorFactory().getVendedorManagerImplementation();
+                    //Devuelve el dato de la fila
+                    Vendedor v = data.getRowValue();
+                    //Añadimos el nuevo valor a la fila
+                    v.setSalario(data.getNewValue());
+                    try {
+                        //Llamamos al método edit para asi poder modificar el nombre del vendedor
+                        vendedorManager.edit(v);
+                        //Mostramos los datos actualizados en la TableView
+                    datosTabla();
+                    } catch (UpdateException ex) {
+                        Logger.getLogger(InicioAdministradorVendedorController.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (ErrorBDException ex) {
+                        Logger.getLogger(InicioAdministradorVendedorController.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (ErrorServerException ex) {
+                        Logger.getLogger(InicioAdministradorVendedorController.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (VendedorNotFoundException ex) {
+                        Logger.getLogger(InicioAdministradorVendedorController.class.getName()).log(Level.SEVERE, null, ex);
+                    }
         });
         //Tienda del vendedor
         colTienda.setCellValueFactory(new PropertyValueFactory<>("tienda"));
@@ -543,7 +703,6 @@ public class InicioAdministradorVendedorController {
                 alert.showAndWait();
                 tbVendedores.refresh();
             } else {
-                try {
                     LOG.log(Level.INFO, "Nueva Tienda: {0}", data.getNewValue());
                     LOG.log(Level.INFO, "Antigua Tienda: {0}", data.getOldValue());
                     //Implementacion del VendedorRESTClient
@@ -552,17 +711,20 @@ public class InicioAdministradorVendedorController {
                     Vendedor v = data.getRowValue();
                     //Añadimos el nuevo valor a la fila
                     v.setTienda(data.getNewValue());
-                    //Llamamos al método edit para asi poder modificar la tienda del vendedor
-                    vendedorManager.edit(v);
-                    //Mostramos los datos actualizados en la TableView
+                    try {
+                        //Llamamos al método edit para asi poder modificar la tienda del vendedor
+                        vendedorManager.edit(v);
+                        //Mostramos los datos actualizados en la TableView
                     datosTabla();
-                } catch (ClientErrorException ex) {
-                    LOG.log(Level.SEVERE, "ClientErrorException");
-                    alert = new Alert(AlertType.ERROR);
-                    alert.setTitle("Administrador");
-                    alert.setHeaderText("Imposible conectar. Inténtelo más tarde");
-                    alert.showAndWait();
-                }
+                    } catch (UpdateException ex) {
+                        Logger.getLogger(InicioAdministradorVendedorController.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (ErrorBDException ex) {
+                        Logger.getLogger(InicioAdministradorVendedorController.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (ErrorServerException ex) {
+                        Logger.getLogger(InicioAdministradorVendedorController.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (VendedorNotFoundException ex) {
+                        Logger.getLogger(InicioAdministradorVendedorController.class.getName()).log(Level.SEVERE, null, ex);
+                    }
             }
         });
         
@@ -578,7 +740,7 @@ public class InicioAdministradorVendedorController {
                 (observable, oldValue, newValue) -> {
                     if (vendedor != null) {
                         btnBorrarVendedor.setDisable(true);
-                    } else {
+                    }else{
                         btnBorrarVendedor.setDisable(false);
                     }
                 });
@@ -661,7 +823,6 @@ public class InicioAdministradorVendedorController {
     }
 
     private void actualizarEstadoVendedor(TableColumn.CellEditEvent<Vendedor, EstadoUsuario> data) {
-        try {
             LOG.log(Level.INFO, "Nuevo Estado de Vendedor: {0}", data.getNewValue());
             LOG.log(Level.INFO, "Antiguo Estado de Vendedor: {0}", data.getOldValue());
             vendedorManager = (VendedorManagerImplementation) new factory.VendedorFactory().getVendedorManagerImplementation();
@@ -669,15 +830,18 @@ public class InicioAdministradorVendedorController {
             Vendedor v = data.getRowValue();
             //Añadimos el nuevo valor a la fila
             v.setStatus(data.getNewValue());
-            vendedorManager.edit(v);
-            datosTabla();
-        } catch (ClientErrorException ex) {
-            LOG.log(Level.SEVERE, "ClientErrorException");
-            alert = new Alert(AlertType.ERROR);
-            alert.setTitle("Administrador");
-            alert.setHeaderText("Imposible conectar. Inténtelo más tarde");
-            alert.showAndWait();
-        }
+            try {
+                vendedorManager.edit(v);
+                datosTabla();
+            } catch (UpdateException ex) {
+                Logger.getLogger(InicioAdministradorVendedorController.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (ErrorBDException ex) {
+                Logger.getLogger(InicioAdministradorVendedorController.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (ErrorServerException ex) {
+                Logger.getLogger(InicioAdministradorVendedorController.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (VendedorNotFoundException ex) {
+                Logger.getLogger(InicioAdministradorVendedorController.class.getName()).log(Level.SEVERE, null, ex);
+            }
 
     }
     

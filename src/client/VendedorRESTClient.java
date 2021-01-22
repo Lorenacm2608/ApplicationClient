@@ -37,8 +37,8 @@ public class VendedorRESTClient implements VendedorManager {
         webTarget = client.target(BASE_URI).path("vendedor");
     }
 
-    public void edit(Object requestEntity) throws ClientErrorException {
-        webTarget.request(javax.ws.rs.core.MediaType.APPLICATION_XML).put(javax.ws.rs.client.Entity.entity(requestEntity, javax.ws.rs.core.MediaType.APPLICATION_XML));
+    public void edit(Vendedor vendedor) throws ClientErrorException {
+        webTarget.request(javax.ws.rs.core.MediaType.APPLICATION_XML).put(javax.ws.rs.client.Entity.entity(vendedor, javax.ws.rs.core.MediaType.APPLICATION_XML));
     }
 
     public <T> T find(Class<T> responseType, String id) throws ClientErrorException {

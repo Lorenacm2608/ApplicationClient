@@ -47,7 +47,17 @@ public class VendedorManagerImplementation implements VendedorManager {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    public void edit(Vendedor vendedor) throws ClientErrorException, UpdateException, ErrorBDException, ErrorServerException, ProveedorNotFoundException {
+    /**
+     *
+     * @param vendedor
+     * @throws ClientErrorException
+     * @throws UpdateException
+     * @throws ErrorBDException
+     * @throws ErrorServerException
+     * @throws ProveedorNotFoundException
+     */
+    @Override
+    public void edit(Vendedor vendedor) throws ClientErrorException, UpdateException, ErrorBDException, ErrorServerException, VendedorNotFoundException {
         webClient = new VendedorRESTClient();
         webClient.edit(vendedor);
     }
@@ -92,11 +102,6 @@ public class VendedorManagerImplementation implements VendedorManager {
 
     @Override
     public <T> T findAllReservas(Class<T> responseType) throws ClientErrorException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void edit(Object requestEntity) throws ClientErrorException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
