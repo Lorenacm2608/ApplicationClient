@@ -217,6 +217,7 @@ public class InicioAdministradorVendedorController {
     private void handleWindowShowing(WindowEvent event) {
         LOG.log(Level.INFO, "Beginning InicioAdministradorVendedorController::handleWindowShowing");
         btnBorrarVendedor.setDisable(true);
+        btnBuscar.setDisable(true);
 
     }
 
@@ -233,7 +234,7 @@ public class InicioAdministradorVendedorController {
     
     private void btnAltaVendedorClick(ActionEvent event) {
         try {
-            /*
+            
             LocalDate fechaHoy = LocalDate.now();
             ZoneId defaultZoneId = ZoneId.systemDefault();
             Date date = Date.from(fechaHoy.atStartOfDay(defaultZoneId).toInstant());
@@ -246,6 +247,7 @@ public class InicioAdministradorVendedorController {
             nuevoVendedor.setDni("");
             //Añadimos por defecto que  el salario es 0
             nuevoVendedor.setSalario(0);
+            nuevoVendedor.setTienda("");
             //Añadimos por defecto que el login está vacio
             nuevoVendedor.setLogin("");
             //Añadimos por defecto que el email está vacio
@@ -262,19 +264,33 @@ public class InicioAdministradorVendedorController {
             nuevoVendedor.setLastAccess(date);
             //Añadimos por defecto que el ultimo cambio de contraseña esta vacio
             nuevoVendedor.setLastPasswordChange("");
+            nuevoVendedor.setDireccion("");
+            nuevoVendedor.setTelefono(0);
             //Implementación del VendedorRESTClient
             vendedorManager = (VendedorManagerImplementation) new factory.VendedorFactory().getVendedorManagerImplementation();
-            //Llamamos al método create para asi poder crear un nuevo vendedor
-            vendedorManager.create(nuevoVendedor);
-            //Añadimos en nuevo vendedor dentro del listvendedores (ObservableList)
+            try {
+                //Añadimos en nuevo vendedor dentro del listvendedores (ObservableList)
             listvendedores.add(nuevoVendedor);
             int row = listvendedores.size() - 1;
-
             // Seleccionamos la nueva fila
             tbVendedores.requestFocus();
             tbVendedores.getSelectionModel().select(row);
             tbVendedores.getFocusModel().focus(row);
-            //}*/
+                //Llamamos al método create para asi poder crear un nuevo vendedor
+                vendedorManager.create(nuevoVendedor);
+            } catch (InsertException ex) {
+                Logger.getLogger(InicioAdministradorVendedorController.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (VendedorYaExisteException ex) {
+                Logger.getLogger(InicioAdministradorVendedorController.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (ErrorBDException ex) {
+                Logger.getLogger(InicioAdministradorVendedorController.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (ErrorServerException ex) {
+                Logger.getLogger(InicioAdministradorVendedorController.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
+
+            
+/*
             //Posicion actual
         TablePosition pos = tbVendedores.getFocusModel().getFocusedCell();
         //
@@ -286,7 +302,7 @@ public class InicioAdministradorVendedorController {
         int row = tbVendedores.getItems().size() - 1;
         tbVendedores.getSelectionModel().select(row, pos.getTableColumn());
         tbVendedores.scrollTo(nuevoVendedor);
-        
+        */
         } catch (ClientErrorException ex) {
             Logger.getLogger(InicioAdministradorVendedorController.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -567,6 +583,103 @@ public class InicioAdministradorVendedorController {
                     }
                 });
     }
+
+    /**
+     *
+     */
+    private void datosTabla() {
+        try {
+            administradorManager = (AdministradorManagerImplementation) new factory.AdministradorFactory().getAdministradorManagerImplementation();
+            listvendedores = FXCollections.observableArrayList(administradorManager.getVendedores());
+            tbVendedores.setItems(listvendedores);
+            //Recorremos el ArrayList Observable de vendedores
+            for (Vendedor v : listvendedores) {
+                LOG.log(Level.INFO, "Lista de Vendedores"
+                        + ": {0}", listvendedores);
+            }
+            //Añadimos esos vendedores dentro de la TableView
+            tbVendedores.setItems(listvendedores);
+        } catch (ClientErrorException ex) {
+            LOG.log(Level.SEVERE, "ClientErrorException");
+            alert = new Alert(AlertType.ERROR);
+            alert.setTitle("Administrador");
+            alert.setHeaderText("Imposible conectar. Inténtelo más tarde");
+            alert.showAndWait();
+        }catch (ErrorServerException ex) {
+            LOG.log(Level.SEVERE, "ErrorBDException");
+            alert = new Alert(AlertType.ERROR);
+            alert.setTitle("Administrador");
+            alert.setHeaderText("Imposible conectar. Inténtelo más tarde");
+            alert.showAndWait();
+        }catch (ErrorBDException ex) {
+            LOG.log(Level.SEVERE, "ErrorBDException");
+            alert = new Alert(AlertType.ERROR);
+            alert.setTitle("Administrador");
+            alert.setHeaderText("Imposible conectar. Inténtelo más tarde");
+            alert.showAndWait();
+        }
+        
+        //tbVendedores.setItems(FXCollections.observableArrayList(listvendedores));
+    }
+    
+    /**
+     *
+     * @param event
+     */
+    private void txtBuscarVendedorNombre(ObservableValue observable, String oldValue, String newValue) {
+    FilteredList<Vendedor> filteredData = new FilteredList<>(listvendedores, u -> true);
+
+        filteredData.setPredicate(vendedor -> {
+            btnBuscar.setDisable(false);
+            //Cuando el TextField de búsqueda esté vacío, mostrará todos los vendedores
+            if (newValue == null || newValue.isEmpty()) {
+                btnBuscar.setDisable(true);
+                return true;
+            }
+
+            //Ponemos el valor en minúsculas
+            String lowerCaseFilter = newValue.toLowerCase();
+            //Buscamos al vendedor usando el nombre
+            if (vendedor.getFullname().toLowerCase().contains(lowerCaseFilter)) {
+                return true; //Vendedor encontrado(s)
+            }
+
+            return false; // Vendedor no encontrado(s)
+        });
+        // Convertimos la FilteredList en una SortedList.
+        SortedList<Vendedor> sortedData = new SortedList<>(filteredData);
+
+        // Se vincula el comparador SortedList al de la TableView.
+        sortedData.comparatorProperty().bind(tbVendedores.comparatorProperty());
+
+        // Añade los datos filtrados a la tabla
+        tbVendedores.setItems(sortedData);
+    }
+    
+    public void setEntityManager(EntityManager entityManager) {
+        this.entityManager = entityManager;
+    }
+
+    private void actualizarEstadoVendedor(TableColumn.CellEditEvent<Vendedor, EstadoUsuario> data) {
+        try {
+            LOG.log(Level.INFO, "Nuevo Estado de Vendedor: {0}", data.getNewValue());
+            LOG.log(Level.INFO, "Antiguo Estado de Vendedor: {0}", data.getOldValue());
+            vendedorManager = (VendedorManagerImplementation) new factory.VendedorFactory().getVendedorManagerImplementation();
+            //Devuelve el dato de la fila
+            Vendedor v = data.getRowValue();
+            //Añadimos el nuevo valor a la fila
+            v.setStatus(data.getNewValue());
+            vendedorManager.edit(v);
+            datosTabla();
+        } catch (ClientErrorException ex) {
+            LOG.log(Level.SEVERE, "ClientErrorException");
+            alert = new Alert(AlertType.ERROR);
+            alert.setTitle("Administrador");
+            alert.setHeaderText("Imposible conectar. Inténtelo más tarde");
+            alert.showAndWait();
+        }
+
+    }
     
     //CONFIGURACIÓN DEL MENÚ
     /**
@@ -621,101 +734,6 @@ public class InicioAdministradorVendedorController {
             LOG.log(Level.INFO, "Has pulsado el boton Cancelar");
             event.consume();
         }
-    }
-    
-    /**
-     *
-     */
-    private void datosTabla() {
-        try {
-            administradorManager = (AdministradorManagerImplementation) new factory.AdministradorFactory().getAdministradorManagerImplementation();
-            listvendedores = FXCollections.observableArrayList(administradorManager.getVendedores());
-            tbVendedores.setItems(listvendedores);
-            //Recorremos el ArrayList Observable de vendedores
-            for (Vendedor v : listvendedores) {
-                LOG.log(Level.INFO, "Lista de Vendedores"
-                        + ": {0}", listvendedores);
-            }
-            //Añadimos esos vendedores dentro de la TableView
-            tbVendedores.setItems(listvendedores);
-        } catch (ClientErrorException ex) {
-            LOG.log(Level.SEVERE, "ClientErrorException");
-            alert = new Alert(AlertType.ERROR);
-            alert.setTitle("Administrador");
-            alert.setHeaderText("Imposible conectar. Inténtelo más tarde");
-            alert.showAndWait();
-        }catch (ErrorServerException ex) {
-            LOG.log(Level.SEVERE, "ErrorBDException");
-            alert = new Alert(AlertType.ERROR);
-            alert.setTitle("Administrador");
-            alert.setHeaderText("Imposible conectar. Inténtelo más tarde");
-            alert.showAndWait();
-        }catch (ErrorBDException ex) {
-            LOG.log(Level.SEVERE, "ErrorBDException");
-            alert = new Alert(AlertType.ERROR);
-            alert.setTitle("Administrador");
-            alert.setHeaderText("Imposible conectar. Inténtelo más tarde");
-            alert.showAndWait();
-        }
-        
-        //tbVendedores.setItems(FXCollections.observableArrayList(listvendedores));
-    }
-    
-    /**
-     *
-     * @param event
-     */
-    private void txtBuscarVendedorNombre(ObservableValue observable, String oldValue, String newValue) {
-    FilteredList<Vendedor> filteredData = new FilteredList<>(listvendedores, u -> true);
-
-        filteredData.setPredicate(vendedor -> {
-            //Cuando el TextField de búsqueda esté vacío, mostrará todos los vendedores
-            if (newValue == null || newValue.isEmpty()) {
-                return true;
-            }
-
-            //Ponemos el valor en minúsculas
-            String lowerCaseFilter = newValue.toLowerCase();
-            //Buscamos al vendedor usando el nombre
-            if (vendedor.getFullname().toLowerCase().contains(lowerCaseFilter)) {
-                return true; //Vendedor encontrado(s)
-            }
-
-            return false; // Vendedor no encontrado(s)
-        });
-        // Convertimos la FilteredList en una SortedList.
-        SortedList<Vendedor> sortedData = new SortedList<>(filteredData);
-
-        // Se vincula el comparador SortedList al de la TableView.
-        sortedData.comparatorProperty().bind(tbVendedores.comparatorProperty());
-
-        // Añade los datos filtrados a la tabla
-        tbVendedores.setItems(sortedData);
-    }
-    
-    public void setEntityManager(EntityManager entityManager) {
-        this.entityManager = entityManager;
-    }
-
-    private void actualizarEstadoVendedor(TableColumn.CellEditEvent<Vendedor, EstadoUsuario> data) {
-        try {
-            LOG.log(Level.INFO, "Nuevo Estado de Vendedor: {0}", data.getNewValue());
-            LOG.log(Level.INFO, "Antiguo Estado de Vendedor: {0}", data.getOldValue());
-            vendedorManager = (VendedorManagerImplementation) new factory.VendedorFactory().getVendedorManagerImplementation();
-            //Devuelve el dato de la fila
-            Vendedor v = data.getRowValue();
-            //Añadimos el nuevo valor a la fila
-            v.setStatus(data.getNewValue());
-            vendedorManager.edit(v);
-            datosTabla();
-        } catch (ClientErrorException ex) {
-            LOG.log(Level.SEVERE, "ClientErrorException");
-            alert = new Alert(AlertType.ERROR);
-            alert.setTitle("Administrador");
-            alert.setHeaderText("Imposible conectar. Inténtelo más tarde");
-            alert.showAndWait();
-        }
-
     }
     
     /**

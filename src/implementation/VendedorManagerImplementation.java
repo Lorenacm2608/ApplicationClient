@@ -5,7 +5,6 @@
  */
 package implementation;
 
-import client.ProveedorRESTClient;
 import client.VendedorRESTClient;
 import exceptions.ErrorBDException;
 import exceptions.ErrorServerException;
@@ -25,7 +24,7 @@ import modelo.Vendedor;
 
 /**
  *
- * @author Lorena
+ * @author Moroni
  */
 public class VendedorManagerImplementation implements VendedorManager {
 
@@ -67,22 +66,23 @@ public class VendedorManagerImplementation implements VendedorManager {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    /**
+     *
+     * @param vendedor
+     * @throws ClientErrorException
+     * @throws InsertException
+     * @throws VendedorYaExisteException
+     * @throws ErrorBDException
+     * @throws ErrorServerException
+     */
+    @Override
     public void create(Vendedor vendedor) throws ClientErrorException, InsertException, VendedorYaExisteException, ErrorBDException, ErrorServerException {
+        webClient = new VendedorRESTClient();
         webClient.create(vendedor);
     }
 
     @Override
-    public void edit(Object requestEntity) throws ClientErrorException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
     public <T> T find(Class<T> responseType, String id) throws ClientErrorException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void create(Object requestEntity) throws ClientErrorException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -92,6 +92,11 @@ public class VendedorManagerImplementation implements VendedorManager {
 
     @Override
     public <T> T findAllReservas(Class<T> responseType) throws ClientErrorException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void edit(Object requestEntity) throws ClientErrorException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

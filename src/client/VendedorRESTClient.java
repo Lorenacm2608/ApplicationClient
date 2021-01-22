@@ -10,6 +10,7 @@ import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
 import manager.VendedorManager;
+import modelo.Vendedor;
 
 /**
  * Jersey REST client generated for REST resource:VendedorFacadeREST
@@ -46,8 +47,8 @@ public class VendedorRESTClient implements VendedorManager {
         return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
     }
 
-    public void create(Object requestEntity) throws ClientErrorException {
-        webTarget.request(javax.ws.rs.core.MediaType.APPLICATION_XML).post(javax.ws.rs.client.Entity.entity(requestEntity, javax.ws.rs.core.MediaType.APPLICATION_XML));
+    public void create(Vendedor vendedor) throws ClientErrorException {
+        webTarget.request(javax.ws.rs.core.MediaType.APPLICATION_XML).post(javax.ws.rs.client.Entity.entity(vendedor, javax.ws.rs.core.MediaType.APPLICATION_XML));
     }
 
     public <T> T findAllReservas(Class<T> responseType) throws ClientErrorException {

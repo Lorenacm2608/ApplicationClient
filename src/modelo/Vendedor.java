@@ -11,33 +11,11 @@ import javax.xml.bind.annotation.XmlTransient;
 @XmlRootElement
 public class Vendedor extends Usuario implements Serializable {
 
-    /*
-     * Vendedor se relaciona con Cliente por OneToMany
-     */
-   
-    private Set<Cliente> cliente;
-
-    /*
-    *Vendedor se relaciona con Producto por ManyToMany
-     */
-    
-    private Set<Producto> productos;
-    
     //id del vendedor
     private Long idVendedor;
-
-    public Long getIdVendedor() {
-        return idVendedor;
-    }
-
-    public void setIdVendedor(Long idVendedor) {
-        this.idVendedor = idVendedor;
-    }
     
     private Administrador administrador;
-
-    private static final long serialVersionUID = 1L;
-
+    
     /*
     * Dni del vendedor
      */
@@ -55,6 +33,35 @@ public class Vendedor extends Usuario implements Serializable {
      */
     
     private String tienda;
+    /*
+     * Vendedor se relaciona con Cliente por OneToMany
+     */
+   
+    private Set<Cliente> cliente;
+
+    /*
+    *Vendedor se relaciona con Producto por ManyToMany
+     */
+    
+    private Set<Producto> productos;
+    
+    public Vendedor(){
+        
+    }
+
+    public Long getIdVendedor() {
+        return idVendedor;
+    }
+
+    public void setIdVendedor(Long idVendedor) {
+        this.idVendedor = idVendedor;
+    }
+    
+    
+
+    private static final long serialVersionUID = 1L;
+
+    
 
     /**
      * Devuelve una lista de productos

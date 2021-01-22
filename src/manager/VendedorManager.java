@@ -5,8 +5,13 @@
  */
 package manager;
 
+import exceptions.ErrorBDException;
+import exceptions.ErrorServerException;
+import exceptions.InsertException;
+import exceptions.VendedorYaExisteException;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.client.WebTarget;
+import modelo.Vendedor;
 
 /**
  *
@@ -18,7 +23,7 @@ public interface VendedorManager {
 
     public <T> T find(Class<T> responseType, String id) throws ClientErrorException;
 
-    public void create(Object requestEntity) throws ClientErrorException;
+    public void create(Vendedor vendedor) throws ClientErrorException, InsertException, VendedorYaExisteException, ErrorBDException, ErrorServerException;
 
     public <T> T findAllReservas(Class<T> responseType) throws ClientErrorException;
 
