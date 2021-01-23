@@ -7,23 +7,17 @@ package controllers;
 
 import implementation.ProductoManagerImplementation;
 import implementation.VendedorManagerImplementacion;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
-import javafx.collections.ListChangeListener.Change;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
@@ -39,9 +33,7 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.TablePosition;
 import javafx.scene.control.TableView;
-import javafx.scene.control.TableView.TableViewSelectionModel;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.ChoiceBoxTableCell;
@@ -56,13 +48,12 @@ import javafx.stage.WindowEvent;
 import javafx.util.Callback;
 import javafx.util.converter.FloatStringConverter;
 import javafx.util.converter.IntegerStringConverter;
-import javax.imageio.ImageIO;
 import modelo.DisponibilidadCell;
 import modelo.Producto;
-import modelo.ProductoCell;
 import modelo.Proveedor;
 import modelo.TipoProducto;
 import modelo.Usuario;
+import modelo.Vendedor;
 import validar.Validar;
 
 /**
@@ -93,7 +84,7 @@ public class InicioVendedorProductoController {
     @FXML
     private TableView<Producto> tvProductos;
     @FXML
-    private TableColumn<Producto, byte[]> tcImagen;
+    private TableColumn<Producto, Long> tcReferencia;
     @FXML
     private TableColumn<Producto, String> tcProducto;
     @FXML
@@ -115,7 +106,7 @@ public class InicioVendedorProductoController {
     @FXML
     private Button btnBorrar;
 
-    private Producto producto;
+    private Producto productoSelecionado;
     private Usuario usuario;
     private Stage stage = new Stage();
     private static final Logger LOG = Logger.getLogger("controllers.InicioAdministradorProductoController");
@@ -125,6 +116,8 @@ public class InicioVendedorProductoController {
     private final ObservableList<String> tallas = FXCollections.observableArrayList(
             "XS", "S", "M", "L", "XL", "36", "37", "38", "39", "40", "41", "42", "44", "45", "46");
     private ObservableList<Proveedor> proveedores;
+    private Set<Vendedor> vendedores;
+
     //LOS PRODUCTOS QUE TENGAN EL MISMO NOMBRE,PROVEEDOR Y TALLA MENSAJE AL USUARIO YA EXISTE Y QUE SOLO ACTUALICE EL PRECIO
     /**
      * Recibe el escenario
@@ -172,6 +165,7 @@ public class InicioVendedorProductoController {
         btnBorrar.setOnAction(this::btnBorrarClick);
         btnBorrar.setTooltip(new Tooltip("Pulse para borrar el producto selecionado "));
         tfBuscar.textProperty().addListener(this::tfBuscarChanged);
+       // vendedores.add((Vendedor) usuario);
 //Indicamos las imagenes de los botones
         imagenBotones();
         /* btnCancelar.setOnAction(this::btnCancelarClick);
@@ -226,13 +220,8 @@ public class InicioVendedorProductoController {
         btnBorrar.setDisable(true);
         tvProductos.setEditable(true);
         //actualiza y rellena la tabla con datos del servidor
-        productos = (ObservableList<Producto>) getAllProductos();
-
-        //for(Producto p:productos)
-        //    System.out.println(p.toString());
+        getAllProductos();
         manejoTablaProducto();
-        // producto = tvProductos.getSelectionModel().getSelectedItem();
-
     }
 
     /**
@@ -241,18 +230,24 @@ public class InicioVendedorProductoController {
      * @param event
      */
     private void btnNuevoClick(ActionEvent event) {
-        LOG.log(Level.INFO, "Beginning LoginController::handleWindowShowing");/*
-        btnGuardar.setDisable(true);
-        btnVerificar.setVisible(false);
-        lblCodigoTemporal.setVisible(false);
-        lblNuevaContrasenia.setVisible(false);
-        lblRepetirContrasenia.setVisible(false);
-        pfNuevaContrasenia.setVisible(false);
-        pfRepetirContrasenia.setVisible(false);
-        tfCodigoTemporal.setVisible(false);
-        lblActualizarContrasenia.setVisible(false);
-        hlReenviarCodigo.setVisible(false);
-         */
+        LOG.log(Level.INFO, "Beginning LoginController::handleWindowShowing");
+        LocalDate localDate = LocalDate.now();
+        Date date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        Producto producto = new Producto();
+        producto.setDescripcion("");
+        producto.setDisponibilidad(date);
+        producto.setModelo("");
+        producto.setPrecio(0f);
+        producto.setStock(0);
+        producto.setTalla("No definido");
+        producto.setProveedor(null);
+        producto.setVendedores(vendedores);
+        try{
+            productoMI.create(producto);
+            getAllProductos();
+        }catch(Exception e){
+            
+        }
     }
 
     /**
@@ -278,19 +273,21 @@ public class InicioVendedorProductoController {
     /**
      * Cargamos todos los productos del servidor a nuestra colección
      */
-    private List<Producto> getAllProductos() {
+    private void getAllProductos() {
         productoMI = (ProductoManagerImplementation) new factory.ProductoFactory().getProductoManagerImplementation();
         ObservableList<Producto> productoServidor = null;
         try {
             productoServidor = FXCollections.observableArrayList(productoMI.findAllProductosAsc());
+            tvProductos.setItems(productoServidor);
+            productos = productoServidor;
             System.out.println(productoServidor.size());
         } catch (Exception e) {
             LOG.severe("InicioAdministradorProductoController:getAllProductos");
         }
-        return productoServidor;
 
     }
-        /**
+
+    /**
      * Cargamos todos los proveedores del servidor a nuestra colección
      */
     private List<Proveedor> getAllProveedores() {
@@ -310,40 +307,11 @@ public class InicioVendedorProductoController {
      * Cargamos la colección a nuestra tabla
      */
     private void manejoTablaProducto() {
-
+        seleccionarProducto();
         productoMI = (ProductoManagerImplementation) new factory.ProductoFactory().getProductoManagerImplementation();
-        //Columnas
-        //  ImageView uno = new ImageView(new Image(this.getClass().getResourceAsStream("nik.jpg")));
-        //  productos.forEach((p) -> {
-        //      p.setImagen(extractBytes("E:\\reto2\\ApplicationClient\\src\\controllers\\"));
-        //  });
-        /*
-        byte[] bytearray = producto.getImagen();
-        BufferedImage imag = ImageIO.read(new ByteArrayInputStream(bytearray));
 
-        Image i = SwingFXUtils.toFXImage(imag, null);
-        ivImagen.setImage(i);
-         */
+        tcReferencia.setCellValueFactory(new PropertyValueFactory<>("id"));
 
-        tcImagen.setCellValueFactory(new PropertyValueFactory<>("imagen"));
-          tcImagen.setCellFactory(new Callback<TableColumn<Producto, byte[]>, TableCell<Producto, byte[]>>() {
-           @Override
-            public TableCell<Producto, byte[]> call(TableColumn<Producto, byte[]> param) {
-               return new ProductoCell(); 
-            }
-        });
-          tcImagen.addEventHandler(TableColumn.<Producto,  byte[]>editCommitEvent(),
-                event -> actualizarImagen(event));
-          
-
- /*
-        tcDisponibilidad.setCellFactory(new Callback<TableColumn<Producto, Date>, TableCell<Producto, Date>>() {
-            @Override
-            public TableCell<Producto, Date> call(TableColumn<Producto, Date> arg0) {
-                return new DisponibilidadCell();
-            }
-        });
-         */
         tcProducto.setCellValueFactory(new PropertyValueFactory<>("modelo"));
         tcProducto.setCellFactory(TextFieldTableCell.forTableColumn());
         tcProducto.addEventHandler(TableColumn.<Producto, String>editCommitEvent(),
@@ -365,10 +333,6 @@ public class InicioVendedorProductoController {
                 forTableColumn(TipoProducto.ROPA, TipoProducto.ZAPATILLAS));
         tcTipo.addEventHandler(TableColumn.<Producto, TipoProducto>editCommitEvent(),
                 event -> actualizarTipoRopa(event));
-        /*
-        tcEstado.addEventHandler(TableColumn.<Reserva, EstadoReserva>editCommitEvent(),
-                    event -> actualizarReservaEstado(event));
-         */
 
         //choicebox
         tcTalla.setCellValueFactory(new PropertyValueFactory<>("talla"));
@@ -385,21 +349,20 @@ public class InicioVendedorProductoController {
         //Ojito con esto
         tcProveedor.setCellValueFactory(new PropertyValueFactory<>("proveedor"));
         tcProveedor.setCellValueFactory((TableColumn.CellDataFeatures<Producto, String> param) -> new SimpleObjectProperty<>(param.getValue().getProveedor().getEmpresa()));
-      //  tcProveedor.setCellFactory(ChoiceBoxTableCell.
-          //      forTableColumn(proveedores));
-      //  tcProveedor.setCellValueFactory((TableColumn.CellDataFeatures<Producto, String> param) -> new SimpleObjectProperty<>(param.getValue().getProveedor().getEmpresa()));
+        //  tcProveedor.setCellFactory(ChoiceBoxTableCell.
+        //      forTableColumn(proveedores));
+        //  tcProveedor.setCellValueFactory((TableColumn.CellDataFeatures<Producto, String> param) -> new SimpleObjectProperty<>(param.getValue().getProveedor().getEmpresa()));
         tcProveedor.addEventHandler(TableColumn.<Producto, String>editCommitEvent(),
                 event -> actualizarProveedor(event));
-        
-       // tcProveedor.setCellValueFactory((TableColumn.CellDataFeatures<Producto, String> param) -> new SimpleObjectProperty<>(param.getValue().getProveedor().getEmpresa()));
-      //  tcProveedor.setOnEditCommit(valor -> {
-      //      System.out.println("Nuevo : " + valor.getNewValue());
-      //      System.out.println("Anterior : " + valor.getOldValue());
-            //   Reserva reserva = valor.getRowValue();
-            //       System.out.println("id de reserva " + reserva.getId());
-            //          reserva.setDescripcion(valor.getNewValue());
-      //  });
 
+        // tcProveedor.setCellValueFactory((TableColumn.CellDataFeatures<Producto, String> param) -> new SimpleObjectProperty<>(param.getValue().getProveedor().getEmpresa()));
+        //  tcProveedor.setOnEditCommit(valor -> {
+        //      System.out.println("Nuevo : " + valor.getNewValue());
+        //      System.out.println("Anterior : " + valor.getOldValue());
+        //   Reserva reserva = valor.getRowValue();
+        //       System.out.println("id de reserva " + reserva.getId());
+        //          reserva.setDescripcion(valor.getNewValue());
+        //  });
         //fecha
         tcDisponibilidad.setCellValueFactory(new PropertyValueFactory<>("disponibilidad"));
         tcDisponibilidad.setCellFactory(new Callback<TableColumn<Producto, Date>, TableCell<Producto, Date>>() {
@@ -411,21 +374,38 @@ public class InicioVendedorProductoController {
         tcDisponibilidad.addEventHandler(TableColumn.<Producto, Date>editCommitEvent(),
                 event -> actualizarDisponibilidad(event));
 
-        tvProductos.setItems(productos);
-
+        // tvProductos.setItems(productos);
     }
 
+    /**
+     * Valida y actualiza el tipo del producto
+     *
+     * @param event
+     */
     private void actualizarTipoRopa(TableColumn.CellEditEvent<Producto, TipoProducto> event) {
 
-        System.out.println("Estoy aca la reserva es " + event);
-        System.out.println((TipoProducto) event.getNewValue());
-        System.out.println((TipoProducto) event.getOldValue());
+        if (!event.getNewValue().equals(event.getOldValue())) {
+            actualizandoTipoRopa(event.getRowValue(), event.getNewValue());
+            tvProductos.refresh();
+        }
+    }
 
-        //   Reserva reserva = event.getRowValue();
-        //  EstadoReserva estado = event.getNewValue();
-        //  System.out.println("Estado: " + estado.toString() + reserva.getId() + reserva.getDescripcion() + "Esto es de reserva: " + reserva.getEstado().toString());
-        //  reserva.setEstado(event.getNewValue());
-        //   System.out.println(reserva.getId() + reserva.getDescripcion() + "Esto es de reserva: " + reserva.getEstado().toString()+" fecha de entrega es "+reserva.getFechaEntrega());
+    /**
+     * Actualiza el tipo de producto en el servidor
+     *
+     * @param producto
+     * @param tipoRopa
+     */
+    private void actualizandoTipoRopa(Producto producto, TipoProducto tipoRopa) {
+        try {
+            producto.setTipo(tipoRopa);
+            producto.setTalla("No definido");
+            productoMI.edit(producto);
+            getAllProductos();
+        } catch (Exception e) {
+
+        }
+
     }
 
     /**
@@ -434,7 +414,7 @@ public class InicioVendedorProductoController {
      * @param event
      */
     private void actualizarTalla(TableColumn.CellEditEvent<Producto, String> event) {
-        // Producto producto = event.getRowValue();
+
         if (Validar.isNumber(event.getNewValue())) {
             if (event.getRowValue().getTipo().equals(TipoProducto.ZAPATILLAS)) {
                 actualizandoTalla(event.getRowValue(), event.getNewValue());
@@ -467,24 +447,10 @@ public class InicioVendedorProductoController {
         try {
             producto.setTalla(talla);
             productoMI.edit(producto);
+            getAllProductos();
         } catch (Exception e) {
 
         }
-    }
-
-    public byte[] extractBytes(String path) {
-        // abrimos la imagen
-        File imgPath = new File(path);
-        ByteArrayOutputStream baos = null;
-        try {
-            BufferedImage img = ImageIO.read(new File(path, "n.png"));
-            ImageIO.write(img, "png", baos);
-            baos.flush();
-            //   String base64String = Base64.encode(baos.toByteArray());
-            baos.close();
-        } catch (IOException e) {
-        }
-        return (baos.toByteArray());
     }
 
     //CONFIGURACIÓN DE IMAGENES 
@@ -514,13 +480,22 @@ public class InicioVendedorProductoController {
     private void actualizarModelo(TableColumn.CellEditEvent<Producto, String> event) {
 
         if (Validar.longitudCadenaSinEspacio(event.getNewValue()) > 3) {
-            if (Validar.isValidCadena(event.getNewValue())) {
-                actualizandoModelo(event.getRowValue(), event.getNewValue());
+
+            if (!Validar.isNumber(event.getNewValue())) {
+                if (Validar.isValidCadena(event.getNewValue())) {
+                    actualizandoModelo(event.getRowValue(), event.getNewValue());
+                } else {
+                    alert = new Alert(AlertType.ERROR);
+                    alert.setTitle("Validación");
+                    alert.setHeaderText("El campo producto tiene carateres extraños");
+                    alert.showAndWait();
+                }
             } else {
                 alert = new Alert(AlertType.ERROR);
                 alert.setTitle("Validación");
-                alert.setHeaderText("El campo producto tiene carateres extraños");
+                alert.setHeaderText("El campo producto no puede estar compuesto solo por números");
                 alert.showAndWait();
+
             }
 
         } else {
@@ -591,6 +566,7 @@ public class InicioVendedorProductoController {
      * @param event
      */
     private void actualizarPrecio(TableColumn.CellEditEvent<Producto, Float> event) {
+
         if (Validar.isNumberFloat(event.getNewValue().toString())) {
             if (event.getNewValue() >= 0) {
                 actualizandoPrecio(event.getRowValue(), event.getNewValue());
@@ -625,23 +601,28 @@ public class InicioVendedorProductoController {
     }
 
     /**
-     * Valida y actualiza la descripcion
+     * Valida y actualiza la descripción
      *
      * @param event
      */
     private void actualizarDescripcion(TableColumn.CellEditEvent<Producto, String> event) {
 
         if (Validar.isValidCadena(event.getNewValue())) {
-            if (Validar.longitudCadenaSinEspacio(event.getNewValue()) > 5) {
-                actualizandoDescripcion(event.getRowValue(), event.getNewValue());
+            if (!Validar.isNumber(event.getNewValue())) {
+                if (Validar.longitudCadenaSinEspacio(event.getNewValue()) > 5) {
+                    actualizandoDescripcion(event.getRowValue(), event.getNewValue());
+                } else {
+                    alert = new Alert(AlertType.ERROR);
+                    alert.setTitle("Validación");
+                    alert.setHeaderText("El campo descripción es demasiado corto");
+                    alert.showAndWait();
+                }
             } else {
                 alert = new Alert(AlertType.ERROR);
                 alert.setTitle("Validación");
-                alert.setHeaderText("El campo descripción es demasiado corto");
+                alert.setHeaderText("El campo descripción no puede estar compuesto sólo por números");
                 alert.showAndWait();
-
             }
-
         } else {
             alert = new Alert(AlertType.ERROR);
             alert.setTitle("Validación");
@@ -661,7 +642,7 @@ public class InicioVendedorProductoController {
         try {
             producto.setDescripcion(descripcion);
             productoMI.edit(producto);
-
+            getAllProductos();
         } catch (Exception e) {
 
         }
@@ -701,15 +682,17 @@ public class InicioVendedorProductoController {
      * @param event
      */
     private void actualizarDisponibilidad(TableColumn.CellEditEvent<Producto, Date> event) {
+
         LocalDate localDate = LocalDate.now();
         Date date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
         if (date.before(event.getNewValue())) {
-            actualizandoDisponibilidad(event.getRowValue(), date);
+            actualizandoDisponibilidad(event.getRowValue(), event.getNewValue());
         } else {
             alert = new Alert(AlertType.ERROR);
             alert.setTitle("Validación");
             alert.setHeaderText("la fecha no puede ser menor a la de hoy");
             alert.showAndWait();
+            tvProductos.refresh();
         }
     }
 
@@ -721,9 +704,12 @@ public class InicioVendedorProductoController {
      */
     private void actualizandoDisponibilidad(Producto producto, Date date) {
         try {
+            LOG.info(date + " del datepicker");
+            LOG.info(producto.getDisponibilidad().toString());
             producto.setDisponibilidad(date);
             productoMI.edit(producto);
 
+            getAllProductos();
         } catch (Exception e) {
 
         }
@@ -733,28 +719,20 @@ public class InicioVendedorProductoController {
      * Metodo que se encargará de las operaciones que se deben realizar cuando
      * un producto este seleccionado.
      */
-    private void productoSelecionado() {
-        tvProductos.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
-            @Override
-            public void changed(ObservableValue observableValue, Object oldValue, Object newValue) {
-                //Check whether item is selected and set value of selected item to Label
-                if (tvProductos.getSelectionModel().getSelectedItem() != null) {
-                    TableViewSelectionModel selectionModel = tvProductos.getSelectionModel();
-                    ObservableList selectedCells = selectionModel.getSelectedCells();
-                    TablePosition tablePosition = (TablePosition) selectedCells.get(0);
-                    Object val = tablePosition.getTableColumn().getCellData(newValue);
-                    System.out.println("Selected Value" + val);
-                }
-            }
-        });
+    private void seleccionarProducto() {
+        // productoSelecionado = tvProductos.getSelectionModel().getSelectedItem();
+        tvProductos.getSelectionModel().selectedItemProperty().addListener(
+                (observable, oldValue, newValue) -> {
+                    if (productoSelecionado != null) {
+                        btnBorrar.setDisable(true);
+                    } else {
+                        btnBorrar.setDisable(false);
+                    }
+                });
     }
 
     private void actualizarProveedor(TableColumn.CellEditEvent<Producto, String> event) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    private void actualizarImagen(TableColumn.CellEditEvent<Producto, byte[]> event) {
-      
     }
 
 }
