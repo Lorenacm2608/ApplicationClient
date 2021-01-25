@@ -6,6 +6,7 @@
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
@@ -26,13 +27,14 @@
                             <menus>
                                 <Menu fx:id="mProductos" mnemonicParsing="false" text="Productos">
                                     <items>
-                                        <MenuItem fx:id="miRegistrarProducto" mnemonicParsing="false" text="Registrar Producto" />
-                                        <MenuItem fx:id="miSalir" mnemonicParsing="false" text="Salir" />
+                                        <MenuItem fx:id="miActualizar" mnemonicParsing="false" onAction="#miActualizarClick" text="Actualizar" />
+                              <SeparatorMenuItem mnemonicParsing="false" />
+                                        <MenuItem fx:id="miSalir" mnemonicParsing="false" onAction="#miSalirClick" text="Salir" />
                                     </items>
                                 </Menu>
                                 <Menu fx:id="mReservas" mnemonicParsing="false" text="Reservas">
                                     <items>
-                                        <MenuItem fx:id="miVerReservas" mnemonicParsing="false" text="Ver Reservas" />
+                                        <MenuItem fx:id="miGestionarReservas" mnemonicParsing="false" onAction="#miGestionarReservasClick" text="Gestionar Reservas" />
                                     </items>
                                 </Menu>
                             </menus>

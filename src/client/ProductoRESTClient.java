@@ -24,7 +24,7 @@ import javax.ws.rs.core.GenericType;
  *
  * @author Fredy
  */
-public class ProductoRESTClient  {
+public class ProductoRESTClient {
 
     private final WebTarget webTarget;
     private final Client client;
@@ -46,7 +46,6 @@ public class ProductoRESTClient  {
         webTarget.request(javax.ws.rs.core.MediaType.APPLICATION_XML).put(javax.ws.rs.client.Entity.entity(requestEntity, javax.ws.rs.core.MediaType.APPLICATION_XML));
     }
 
-   
     public <T> T findAllProductosAsc(GenericType<T> responseType) throws ClientErrorException {
         WebTarget resource = webTarget;
         resource = resource.path("findAllProductosAsc");

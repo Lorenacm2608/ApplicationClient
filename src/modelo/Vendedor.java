@@ -51,7 +51,7 @@ public class Vendedor extends Usuario implements Serializable {
      *
      * @return productos
      */
-    @XmlTransient
+    
     public Set<Producto> getProductos() {
         return productos;
     }

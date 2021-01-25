@@ -7,13 +7,14 @@ package factory;
 
 import manager.ClienteManager;
 import client.ClienteRESTClient;
+import implementation.ClienteManagerImplementation;
 
 /**
  *
  * @author 2dam
  */
 public class ClienteFactory {
-    public ClienteManager getClienteRESTClient (){
-        return new ClienteRESTClient();
+    public ClienteManager getClienteManagerImplementation (){
+        return new ClienteManagerImplementation();
     }
 }

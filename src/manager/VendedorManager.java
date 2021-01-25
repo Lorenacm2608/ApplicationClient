@@ -17,7 +17,7 @@ import modelo.Vendedor;
  */
 public interface VendedorManager {
 
-    public void edit(Object requestEntity) throws ClientErrorException;
+    public void edit(Vendedor vendedor) throws ClientErrorException;
 
     public Vendedor find(String id) throws ClientErrorException;
 
@@ -26,6 +26,8 @@ public interface VendedorManager {
     public List<Reserva> findAllReservas() throws ClientErrorException;
 
     public List<Proveedor> getProveedoresProducto() throws ClientErrorException;
+
+    public List<Vendedor> findAllVendedores() throws ClientErrorException;
 
     public void remove(String id) throws ClientErrorException;
 

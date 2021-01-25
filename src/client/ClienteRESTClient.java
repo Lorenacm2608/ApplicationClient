@@ -24,7 +24,7 @@ import manager.ClienteManager;
  *
  * @author Fredy
  */
-public class ClienteRESTClient implements ClienteManager {
+public class ClienteRESTClient  {
 
     private WebTarget webTarget;
     private Client client;

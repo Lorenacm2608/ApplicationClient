@@ -25,7 +25,7 @@ import manager.ReservaManager;
  *
  * @author Fredy
  */
-public class ReservaRESTClient implements ReservaManager {
+public class ReservaRESTClient {
 
     private WebTarget webTarget;
     private Client client;
@@ -52,13 +52,14 @@ public class ReservaRESTClient implements ReservaManager {
         resource = resource.path("findReservasConfirmadas");
         return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
     }
+
     //igual quitar las Ts y poner List <Reservas>   y luego en el generic quitar la <T> y tambien el return, return list<Reservas>
     public <T> T findReservas(GenericType<T> responseType) throws ClientErrorException {
         WebTarget resource = webTarget;
         resource = resource.path("findReservas");
         return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
     }
-    
+
     public <T> T find(Class<T> responseType, String id) throws ClientErrorException {
         WebTarget resource = webTarget;
         resource = resource.path(java.text.MessageFormat.format("{0}", new Object[]{id}));

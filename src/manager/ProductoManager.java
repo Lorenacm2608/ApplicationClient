@@ -5,10 +5,11 @@
  */
 package manager;
 
+import exceptions.ErrorBDException;
+import exceptions.ErrorServerException;
 import exceptions.ProductoExistenteException;
 import java.util.Collection;
 import javax.ws.rs.ClientErrorException;
-import javax.ws.rs.client.WebTarget;
 import modelo.Producto;
 
 /**
@@ -17,21 +18,33 @@ import modelo.Producto;
  */
 public interface ProductoManager {
 
-    public Collection<Producto> findAllRopa() throws ClientErrorException;
+    public Collection<Producto> findAllRopa() throws ClientErrorException, ErrorBDException, ErrorServerException;
 
-    public void edit(Producto producto) throws ProductoExistenteException,ClientErrorException;
+    ;
 
-    public Collection<Producto> findAllProductosAsc() throws ClientErrorException;
+    public void edit(Producto producto) throws ProductoExistenteException, ClientErrorException, ProductoExistenteException, ErrorBDException, ErrorServerException;
 
-    public Producto find(String id) throws ClientErrorException;
+    ;
 
-    public void create(Producto producto) throws ProductoExistenteException,ClientErrorException;
+    public Collection<Producto> findAllProductosAsc() throws ClientErrorException, ErrorBDException, ErrorServerException;
+
+    ;
+
+    public Producto find(String id) throws ClientErrorException, ErrorBDException, ErrorServerException;
+
+    ;
+
+    public void create(Producto producto) throws ProductoExistenteException, ProductoExistenteException, ClientErrorException, ErrorBDException, ErrorServerException;
+
+    ;
 
     public Collection<Producto> findAllProductosDesc() throws ClientErrorException;
 
     public Collection<Producto> findAllZapatillas() throws ClientErrorException;
 
-    public void remove(String id) throws ClientErrorException;
+    public void remove(String id) throws ClientErrorException, ErrorBDException, ErrorServerException;
+
+    ;
 
     public void close();
 

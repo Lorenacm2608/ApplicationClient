@@ -6,7 +6,10 @@
 package implementation;
 
 import client.ProductoRESTClient;
+import exceptions.ErrorBDException;
+import exceptions.ErrorServerException;
 import exceptions.ProductoExistenteException;
+import java.net.ConnectException;
 import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
@@ -29,28 +32,30 @@ public class ProductoManagerImplementation implements ProductoManager {
     }
 
     @Override
-    public Collection<Producto> findAllRopa() throws ClientErrorException {
+    public Collection<Producto> findAllRopa() throws ClientErrorException , ErrorBDException, ErrorServerException{
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public void edit(Producto producto) throws ProductoExistenteException, ClientErrorException {
+    public void edit(Producto producto) throws ProductoExistenteException, ClientErrorException,ErrorServerException {
         try {
             webClient.edit(producto);
         } catch (Exception e) {
+            if(e.getCause() instanceof ConnectException){
+                LOGGER.severe("ProductoManagerImplementation: ErrorServerException   " + e.getMessage());
+                throw new ErrorServerException();
+            }
             LOGGER.severe("edit:" + e.getMessage());
         }
     }
 
     @Override
-    public Collection<Producto> findAllProductosAsc() throws ClientErrorException {
+    public Collection<Producto> findAllProductosAsc() throws ClientErrorException, ErrorBDException, ErrorServerException {
         List<Producto> productos = null;
         try {
             productos = webClient.findAllProductosAsc(new GenericType<List<Producto>>() {
             });
-            for (Producto p : productos) {
-                System.out.println(p.toString());
-            }
+
         } catch (Exception e) {
             LOGGER.severe("findAllProductosAsc:" + e.getMessage());
         }
@@ -83,8 +88,12 @@ public class ProductoManagerImplementation implements ProductoManager {
     }
 
     @Override
-    public void remove(String id) throws ClientErrorException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void remove(String id) throws ClientErrorException, ErrorBDException, ErrorServerException {
+        try {
+            webClient.remove(id);
+        } catch (Exception e) {
+            LOGGER.severe("remove:" + e.getMessage());
+        }
     }
 
     @Override

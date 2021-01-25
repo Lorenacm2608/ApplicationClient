@@ -127,10 +127,6 @@ public class RecuperarContraseniaController {
         tfCodigoTemporal.textProperty().addListener(this::txtChanged);
         pfNuevaContrasenia.textProperty().addListener(this::pfContraseniaChanged);
         pfRepetirContrasenia.textProperty().addListener(this::pfContraseniaChanged);
-        //  txtUsuario.textProperty().addListener(this::txtChanged);
-        //  txtContrasena.textProperty().addListener(this::txtChanged);
-        //  hlRegistrarse.setOnAction(this::hlRegistrarseClick);
-        //  hlContraseniaOlvidada.setOnAction(this::hlContraseniaOlvidadClick);
         stage.show();
     }
 
@@ -140,7 +136,7 @@ public class RecuperarContraseniaController {
      * @param event, WindowEvent
      */
     private void handleWindowClose(WindowEvent event) {
-         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setHeaderText(null);
         alert.setTitle("LogIn");
         alert.setContentText("¿Estas seguro que quieres salir de la ventana?");
@@ -154,7 +150,6 @@ public class RecuperarContraseniaController {
             event.consume();
         }
     }
-    
 
     /**
      * Configura los eventos al iniciar la ventana)
@@ -178,6 +173,11 @@ public class RecuperarContraseniaController {
 
     }
 
+    /**
+     * Método que atualiza la contraseña y nos redirecciona a otra ventana
+     *
+     * @param event
+     */
     private void btnGuardarClick(ActionEvent event) {
         if (pfNuevaContrasenia.getText().equals(pfRepetirContrasenia.getText())) {
             LOG.log(Level.INFO, "Ventana LOGIN");
@@ -220,11 +220,18 @@ public class RecuperarContraseniaController {
         }
     }
 
+    /**
+     * Genera la contraseña aleartoria y además estable valores a los
+     * componentes
+     *
+     * @param event
+     */
     private void btnAceptarClick(ActionEvent event) {
         UsuarioManagerImplementation usuarioMI = (UsuarioManagerImplementation) new UsuarioFactory().getUsuarioManagerImplementation();
         Alert alert;
 
         try {
+            //Generá la contraseña
             codigoTemporal = Seguridad.generarContrasenia();
             tfCodigoTemporal.setVisible(true);
             lblCodigoTemporal.setVisible(true);
@@ -232,6 +239,7 @@ public class RecuperarContraseniaController {
             btnVerificar.setDisable(true);
             btnVerificar.setVisible(true);
             tfCodigoTemporal.requestFocus();
+            //Generamos una contraseña aleartoria y la enviamos al correo
             usuarioMI.enviarMensajeEmail(Seguridad.encriptarContrasenia(usuario.getEmail()), Seguridad.encriptarContrasenia(codigoTemporal));
             btnAceptar.setDisable(true);
         } catch (Exception e) {
@@ -239,6 +247,11 @@ public class RecuperarContraseniaController {
         }
     }
 
+    /**
+     * Cancela la operacción de recuperar contraseña
+     *
+     * @param event
+     */
     private void btnCancelarClick(ActionEvent event) {
         LOG.log(Level.INFO, "Ventana LOGIN");
         alert = new Alert(Alert.AlertType.CONFIRMATION);
@@ -264,6 +277,12 @@ public class RecuperarContraseniaController {
         }
     }
 
+    /**
+     * HyperLink se pondrá visible cuando el usuario reciba un correo (Reenvio
+     * de la contraseña generada)
+     *
+     * @param event
+     */
     private void hlReenviarCodigoClick(ActionEvent event) {
 
         UsuarioManagerImplementation usuarioMI = (UsuarioManagerImplementation) new UsuarioFactory().getUsuarioManagerImplementation();
@@ -278,6 +297,11 @@ public class RecuperarContraseniaController {
         }
     }
 
+    /**
+     * Establece algunas propiedades en los componentes
+     *
+     * @param event
+     */
     private void btnVerificarClick(ActionEvent event) {
         if (codigoTemporal.equals(tfCodigoTemporal.getText())) {
             btnVerificar.setDisable(true);
@@ -295,11 +319,17 @@ public class RecuperarContraseniaController {
         } else {
             tfCodigoTemporal.setStyle("-fx-faint-focus-color: transparent; -fx-focus-color:rgba(255,0,0,1);");
             tfCodigoTemporal.requestFocus();
-
         }
 
     }
 
+    /**
+     * Verificamos si ambas contraseñas coinciden
+     *
+     * @param observable
+     * @param oldValue
+     * @param newValue
+     */
     private void pfContraseniaChanged(ObservableValue observable, String oldValue, String newValue) {
         Validar.addTextLimiter(pfNuevaContrasenia, 30);
         Validar.addTextLimiter(pfRepetirContrasenia, 30);
@@ -315,10 +345,15 @@ public class RecuperarContraseniaController {
         }
     }
 
+    /**
+     * Añadimos escuchadores y definimos la longitud de los caracteres
+     *
+     * @param observable
+     * @param oldValue
+     * @param newValue
+     */
     private void txtChanged(ObservableValue observable, String oldValue, String newValue) {
         Validar.addTextLimiter(tfCodigoTemporal, 10);
-        //  Validar.addTextLimiterPass(txtContrasena, treinta);
-        // if (!tfCodigoTemporal.getText().trim().equals("") && !tfCodigoTemporal.getText().trim().equals("")) {
         if (!tfCodigoTemporal.getText().trim().equals("")) {
             boolean isValidUsuario = Validar.isValidNombre(tfCodigoTemporal);
             if (isValidUsuario) {
@@ -327,12 +362,7 @@ public class RecuperarContraseniaController {
                 btnVerificar.setDisable(true);
 
             }
-        }/*
-        if (txtUsuario.getText().trim().equals("") || txtContrasena.getText().trim().equals("")) {
-
-            btnIniciar.setDisable(true);
-
-        }*/
+        }
     }
 
     /**
