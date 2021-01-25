@@ -32,32 +32,34 @@ public class ProductoManagerImplementation implements ProductoManager {
     }
 
     @Override
-    public Collection<Producto> findAllRopa() throws ClientErrorException , ErrorBDException, ErrorServerException{
+    public Collection<Producto> findAllRopa() throws ClientErrorException, ErrorBDException, ErrorServerException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public void edit(Producto producto) throws ProductoExistenteException, ClientErrorException,ErrorServerException {
+    public void edit(Producto producto) throws ProductoExistenteException, ErrorServerException {
         try {
             webClient.edit(producto);
         } catch (Exception e) {
-            if(e.getCause() instanceof ConnectException){
-                LOGGER.severe("ProductoManagerImplementation: ErrorServerException   " + e.getMessage());
+            if (e instanceof ConnectException) {
+                LOGGER.severe("ProductoManagerImplementation: edit " + e.getMessage());
                 throw new ErrorServerException();
             }
-            LOGGER.severe("edit:" + e.getMessage());
         }
     }
 
     @Override
-    public Collection<Producto> findAllProductosAsc() throws ClientErrorException, ErrorBDException, ErrorServerException {
+    public Collection<Producto> findAllProductosAsc() throws  ErrorBDException, ErrorServerException {
         List<Producto> productos = null;
         try {
             productos = webClient.findAllProductosAsc(new GenericType<List<Producto>>() {
             });
 
         } catch (Exception e) {
-            LOGGER.severe("findAllProductosAsc:" + e.getMessage());
+            if (e instanceof ConnectException) {
+                LOGGER.severe("ProductoManagerImplementation: findAllProductosAsc " + e.getMessage());
+                throw new ErrorServerException();
+            }
         }
         return productos;
     }
@@ -68,11 +70,14 @@ public class ProductoManagerImplementation implements ProductoManager {
     }
 
     @Override
-    public void create(Producto producto) throws ProductoExistenteException, ClientErrorException {
+    public void create(Producto producto) throws ProductoExistenteException,  ErrorServerException {
         try {
             webClient.create(producto);
         } catch (Exception e) {
-            LOGGER.severe("create:" + e.getMessage());
+            if (e instanceof ConnectException) {
+                LOGGER.severe("ProductoManagerImplementation: create " + e.getMessage());
+                throw new ErrorServerException();
+            }
         }
 
     }
@@ -88,11 +93,14 @@ public class ProductoManagerImplementation implements ProductoManager {
     }
 
     @Override
-    public void remove(String id) throws ClientErrorException, ErrorBDException, ErrorServerException {
+    public void remove(String id) throws ConnectException, ErrorBDException, ErrorServerException {
         try {
             webClient.remove(id);
         } catch (Exception e) {
-            LOGGER.severe("remove:" + e.getMessage());
+            if (e instanceof ConnectException) {
+                LOGGER.severe("ProductoManagerImplementation: remove " + e.getMessage());
+                throw new ErrorServerException();
+            }
         }
     }
 

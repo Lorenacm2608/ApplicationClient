@@ -6,6 +6,7 @@
 package implementation;
 
 import client.ReservaRESTClient;
+import exceptions.ErrorServerException;
 import java.util.List;
 import java.util.logging.Logger;
 import javax.ws.rs.ClientErrorException;
@@ -51,7 +52,7 @@ public class ReservaManagerImplementation implements ReservaManager {
     }
 
     @Override
-    public List<Reserva> findReservasRealizadas() throws ClientErrorException {
+    public List<Reserva> findReservasRealizadas() throws ErrorServerException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -61,11 +62,12 @@ public class ReservaManagerImplementation implements ReservaManager {
     }
 
     @Override
-    public void remove(String id) throws ClientErrorException {
+    public void remove(String id) throws ErrorServerException {
         try {
             webClient.remove(id);
-        } catch (Exception e) {
-            LOGGER.severe("remove:" + e.getMessage());
+        } catch (ClientErrorException e) {
+            LOGGER.severe("ReservaManagerImplementation: remove " + e.getMessage());
+            throw new ErrorServerException();
         }
     }
 

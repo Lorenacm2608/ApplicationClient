@@ -5,6 +5,7 @@
  */
 package manager;
 
+import exceptions.ErrorServerException;
 import java.util.List;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.client.WebTarget;
@@ -27,11 +28,11 @@ public interface ReservaManager {
 
     public void create(Reserva reserva) throws ClientErrorException;
 
-    public List<Reserva> findReservasRealizadas() throws ClientErrorException;
+    public List<Reserva> findReservasRealizadas() throws ErrorServerException;
 
     public List<Reserva> findReservas() throws ClientErrorException;
 
-    public void remove(String id) throws ClientErrorException;
+    public void remove(String id) throws ErrorServerException;
 
     public void close();
 

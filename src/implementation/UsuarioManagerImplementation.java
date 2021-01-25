@@ -30,40 +30,43 @@ public class UsuarioManagerImplementation implements UsuarioManager {
     }
 
     @Override
-    public void edit(Usuario usuario) throws ClientErrorException {
+    public void edit(Usuario usuario) throws  ErrorServerException {
         try {
             webClient.edit(usuario);
-        } catch (Exception e) {
-
+         } catch (ClientErrorException e) {
+            LOGGER.severe("UsuarioManagerImplmentation: edit " + e.getMessage());
+            throw new ErrorServerException();
         }
     }
 
     @Override
-    public Usuario find(String id) throws ClientErrorException {
+    public Usuario find(String id) throws  ErrorServerException {
         Usuario usuario = null;
         try {
             usuario = webClient.find(Usuario.class, id);
-        } catch (Exception e) {
-            LOGGER.severe("find: ClientErrorException");
-
+         } catch (ClientErrorException e) {
+            LOGGER.severe("UsuarioManagerImplmentation: find " + e.getMessage());
+            throw new ErrorServerException();
         }
         return usuario;
     }
 
     @Override
-    public Usuario usuarioByLogin(String login, String pass) throws AutenticacionFallidaException {
+    public Usuario usuarioByLogin(String login, String pass) throws AutenticacionFallidaException, ErrorServerException {
         Usuario usuario = null;
         try {
             usuario = webClient.usuarioByLogin(Usuario.class, login, pass);
         } catch (Exception e) {
-            LOGGER.severe("usuarioLogin: AutenticacionFallidaException");
-            throw new AutenticacionFallidaException();
+            if (e.getCause() instanceof ConnectException) {
+                LOGGER.severe("usuarioByLogin: ErrorServerException   " + e.getMessage());
+                throw new ErrorServerException();
+            } else {
+                LOGGER.severe("usuarioByLogin: UsuarioNoEncontradoException   " + e.getMessage());
+               throw new AutenticacionFallidaException();
+            }
         }
         return usuario;
-    }
-
-    
-    
+    }   
 
     @Override
     public Usuario usuarioLogin(String login) throws UsuarioNoEncontradoException, ErrorServerException {
@@ -84,21 +87,23 @@ public class UsuarioManagerImplementation implements UsuarioManager {
     }
 
     @Override
-    public void create(Usuario usuario) throws ClientErrorException {
+    public void create(Usuario usuario) throws  ErrorServerException {
         try {
             webClient.create(webClient);
-        } catch (Exception e) {
-
+         } catch (ClientErrorException e) {
+            LOGGER.severe("ReservaManagerImplementation: create " + e.getMessage());
+            throw new ErrorServerException();
         }
 
     }
 
     @Override
-    public void remove(String id) throws ClientErrorException {
+    public void remove(String id) throws  ErrorServerException {
         try {
             webClient.remove(id);
-        } catch (Exception e) {
-
+         } catch (ClientErrorException e) {
+            LOGGER.severe("ReservaManagerImplementation: remove " + e.getMessage());
+            throw new ErrorServerException();
         }
     }
 
@@ -113,7 +118,7 @@ public class UsuarioManagerImplementation implements UsuarioManager {
         try {
              usuario=webClient.enviarMensajeEmail(Usuario.class,email, pass);
         } catch (Exception e) {
-            LOGGER.severe("enviarMensajeEmail: ErrorEnviarEmailExcpetion");
+            LOGGER.severe("UsuarioManagerImplementation: ErrorEnviarEmailException");
             throw new ErrorEnviarEmailException();
         }
         return usuario;

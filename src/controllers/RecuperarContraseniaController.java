@@ -5,6 +5,7 @@
  */
 package controllers;
 
+import exceptions.ErrorServerException;
 import factory.UsuarioFactory;
 import implementation.UsuarioManagerImplementation;
 import java.io.IOException;
@@ -18,6 +19,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Hyperlink;
@@ -200,6 +202,12 @@ public class RecuperarContraseniaController {
                     stage.hide();
                 } catch (IOException e) {
                     LOG.log(Level.SEVERE, "Se ha producido un error de E/S");
+                } catch (ErrorServerException ex) {
+                    LOG.log(Level.SEVERE, "ErrorServerException");
+                    alert = new Alert(AlertType.ERROR);
+                    alert.setTitle("Administrador");
+                    alert.setHeaderText("Imposible conectar. Inténtelo más tarde");
+                    alert.showAndWait();
                 }
 
             } else {

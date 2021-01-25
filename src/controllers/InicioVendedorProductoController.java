@@ -5,10 +5,14 @@
  */
 package controllers;
 
+import exceptions.ErrorBDException;
+import exceptions.ErrorServerException;
+import exceptions.ProductoExistenteException;
 import implementation.ClienteManagerImplementation;
 import implementation.ProductoManagerImplementation;
 import implementation.ReservaManagerImplementation;
 import implementation.VendedorManagerImplementacion;
+import java.net.ConnectException;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -52,6 +56,7 @@ import javafx.stage.WindowEvent;
 import javafx.util.Callback;
 import javafx.util.converter.FloatStringConverter;
 import javafx.util.converter.IntegerStringConverter;
+import javax.ws.rs.ClientErrorException;
 import modelo.Cliente;
 import modelo.DisponibilidadCell;
 import modelo.Producto;
@@ -183,7 +188,7 @@ public class InicioVendedorProductoController {
         btnBorrar.setOnAction(this::btnBorrarClick);
         btnBorrar.setTooltip(new Tooltip("Pulse para borrar el producto selecionado "));
         tfBuscar.textProperty().addListener(this::tfBuscarChanged);
-        // vendedores.add((Vendedor) usuario);
+         vendedores.add((Vendedor) usuario);
         //Indicamos las imagenes de los botones
         imagenBotones();
         stage.show();
@@ -302,8 +307,12 @@ public class InicioVendedorProductoController {
             productoMI.create(producto);
             getAllProductos();
 
-        } catch (Exception e) {
-
+        } catch (ErrorServerException | ProductoExistenteException | ClientErrorException e) {
+            LOG.log(Level.SEVERE, "ErrorServerException");
+            alert = new Alert(AlertType.ERROR);
+            alert.setTitle("Producto");
+            alert.setHeaderText("Imposible conectar. Inténtelo más tarde");
+            alert.showAndWait();
         }
     }
 
@@ -321,30 +330,34 @@ public class InicioVendedorProductoController {
         Optional<ButtonType> respuesta = alert.showAndWait();
 
         if (respuesta.get() == ButtonType.OK) {
-            LOG.log(Level.INFO, "Has pulsado el boton Aceptar");
-            tvProductos.getSelectionModel().clearSelection();
+            try {
+                LOG.log(Level.INFO, "Has pulsado el boton Aceptar");
+                tvProductos.getSelectionModel().clearSelection();
 
-            ReservaManagerImplementation reservaMI = (ReservaManagerImplementation) new factory.ReservaFactory().getReservaManagerImplmentation();
-            VendedorManagerImplementacion vendedorMI = (VendedorManagerImplementacion) new factory.VendedorFactory().getVendedorManagerImplementacion();
-            ObservableList<Reserva> reservas = FXCollections.observableArrayList(vendedorMI.findAllReservas());
-            //El producto está reservado?
-            if (!estaReservado(reservas, productoSelecionado.getId())) {
-                System.out.println(reservas.size());
-                borrandoProducto();
-            } else {
-                alert = new Alert(Alert.AlertType.CONFIRMATION);
-                alert.setHeaderText(null);
-                alert.setTitle("Borrar Producto");
-                alert.setContentText("¡El producto está reservado! ¿Quieres poner a 0 el stock del producto? (Recomendado)");
-                Optional<ButtonType> respuestaForzar = alert.showAndWait();
-                if (respuestaForzar.get() == ButtonType.OK) {
-                    LOG.log(Level.INFO, "Has pulsado el boton Aceptar");
-                    actualizandoStock(productoSelecionado, 0);
+                ReservaManagerImplementation reservaMI = (ReservaManagerImplementation) new factory.ReservaFactory().getReservaManagerImplmentation();
+                VendedorManagerImplementacion vendedorMI = (VendedorManagerImplementacion) new factory.VendedorFactory().getVendedorManagerImplementacion();
+                ObservableList<Reserva> reservas = FXCollections.observableArrayList(vendedorMI.findAllReservas());
+                //El producto está reservado?
+                if (!estaReservado(reservas, productoSelecionado.getId())) {
+                    borrandoVendedorProducto(vendedorMI, productoSelecionado);
+                    borrandoProducto();
+                } else if (productoSelecionado.getStock() != 0) {
+                    alert = new Alert(Alert.AlertType.CONFIRMATION);
+                    alert.setHeaderText(null);
+                    alert.setTitle("Borrar Producto");
+                    alert.setContentText("¡El producto está reservado! ¿Quieres poner a 0 el stock del producto? (Recomendado)");
+                    Optional<ButtonType> respuestaForzar = alert.showAndWait();
+                    if (respuestaForzar.get() == ButtonType.OK) {
+                        LOG.log(Level.INFO, "Has pulsado el boton Aceptar");
+                        actualizandoStock(productoSelecionado, 0);
+                    }
+                    LOG.log(Level.INFO, "Has pulsado el boton Cancelar");
+                    event.consume();
                 } else {
                     alert = new Alert(Alert.AlertType.CONFIRMATION);
                     alert.setHeaderText(null);
                     alert.setTitle("Borrar Producto");
-                    alert.setContentText("¡Se procederá a borrar el producto de todas las reservas!\n ¿Estás seguro que quieres continuar con el procedimiento?\n (NO Recomendado)");
+                    alert.setContentText("¡Se procederá a borrar el producto ! (NO Recomendado)");
                     Optional<ButtonType> respuestaForzado = alert.showAndWait();
                     if (respuestaForzado.get() == ButtonType.OK) {
                         LOG.log(Level.INFO, "Has pulsado el boton Aceptar");
@@ -354,10 +367,15 @@ public class InicioVendedorProductoController {
                     } else {
                         LOG.log(Level.INFO, "Has pulsado el boton Cancelar");
                         event.consume();
+
                     }
                 }
-                LOG.log(Level.INFO, "Has pulsado el boton Cancelar");
-                event.consume();
+            } catch (ErrorServerException ex) {
+                LOG.log(Level.SEVERE, "ErrorServerException");
+                alert = new Alert(AlertType.ERROR);
+                alert.setTitle("Producto");
+                alert.setHeaderText("Imposible conectar. Inténtelo más tarde");
+                alert.showAndWait();
             }
 
         } else {
@@ -366,6 +384,9 @@ public class InicioVendedorProductoController {
         }
     }
 
+    /**
+     *
+     */
     /**
      * Cargamos todos los productos del servidor a nuestra colección
      */
@@ -379,12 +400,31 @@ public class InicioVendedorProductoController {
             productos = productosServidor;
             getAllProveedores();
             tvProductos.refresh();
-        } catch (Exception e) {
-            LOG.severe("getAllProductos:Exception");
+        } catch (ErrorBDException | ErrorServerException | ClientErrorException e) {
+            LOG.log(Level.SEVERE, "ErrorServerException");
+            alert = new Alert(AlertType.ERROR);
+            alert.setTitle("Producto");
+            alert.setHeaderText("Imposible conectar. Inténtelo más tarde");
+            alert.showAndWait();
         }
 
     }
 
+    /*     } else {
+                    alert = new Alert(Alert.AlertType.CONFIRMATION);
+                    alert.setHeaderText(null);
+                    alert.setTitle("Borrar Producto");
+                    alert.setContentText("¡Se procederá a borrar el producto de todas las reservas!\n ¿Estás seguro que quieres continuar con el procedimiento?\n (NO Recomendado)");
+                    Optional<ButtonType> respuestaForzado = alert.showAndWait();
+                    if (respuestaForzado.get() == ButtonType.OK) {
+                        LOG.log(Level.INFO, "Has pulsado el boton Aceptar");
+                        borrandoVendedorProducto(vendedorMI, productoSelecionado);
+                        borrandoReservas(reservaMI, reservas, productoSelecionado);
+                        borrandoProducto();
+                    } else {
+                        LOG.log(Level.INFO, "Has pulsado el boton Cancelar");
+                        event.consume();
+                    }*/
     /**
      * Cargamos todos los proveedores del servidor a nuestra colección
      */
@@ -396,8 +436,12 @@ public class InicioVendedorProductoController {
             proveedoresServidor = FXCollections.observableArrayList(vendedorMI.getProveedoresProducto());
             cargarProveedores(proveedoresServidor);
 
-        } catch (Exception e) {
-            LOG.severe("getAllProveedores:Exception");
+        } catch (ErrorServerException e) {
+            LOG.log(Level.SEVERE, "ErrorServerException");
+            alert = new Alert(AlertType.ERROR);
+            alert.setTitle("Producto");
+            alert.setHeaderText("Imposible conectar. Inténtelo más tarde");
+            alert.showAndWait();
         }
     }
 
@@ -496,8 +540,12 @@ public class InicioVendedorProductoController {
             producto.setProveedor(flyshoes);
             productoMI.edit(producto);
             getAllProductos();
-        } catch (Exception e) {
-
+        } catch (ErrorServerException | ProductoExistenteException | ClientErrorException e) {
+            LOG.log(Level.SEVERE, "ErrorServerException");
+            alert = new Alert(AlertType.ERROR);
+            alert.setTitle("Producto");
+            alert.setHeaderText("Imposible conectar. Inténtelo más tarde");
+            alert.showAndWait();
         }
     }
 
@@ -554,8 +602,12 @@ public class InicioVendedorProductoController {
             producto.setTalla(talla);
             productoMI.edit(producto);
             getAllProductos();
-        } catch (Exception e) {
-
+        } catch (ErrorServerException | ProductoExistenteException | ClientErrorException e) {
+            LOG.log(Level.SEVERE, "ErrorServerException");
+            alert = new Alert(AlertType.ERROR);
+            alert.setTitle("Producto");
+            alert.setHeaderText("Imposible conectar. Inténtelo más tarde");
+            alert.showAndWait();
         }
     }
 
@@ -636,7 +688,12 @@ public class InicioVendedorProductoController {
             producto.setModelo(modelo);
             productoMI.edit(producto);
             getAllProductos();
-        } catch (Exception e) {
+        } catch (ErrorServerException | ProductoExistenteException | ClientErrorException e) {
+            LOG.log(Level.SEVERE, "ErrorServerException");
+            alert = new Alert(AlertType.ERROR);
+            alert.setTitle("Producto");
+            alert.setHeaderText("Imposible conectar. Inténtelo más tarde");
+            alert.showAndWait();
         }
     }
 
@@ -678,7 +735,12 @@ public class InicioVendedorProductoController {
             producto.setStock(stock);
             productoMI.edit(producto);
             getAllProductos();
-        } catch (Exception e) {
+        } catch (ErrorServerException | ProductoExistenteException | ClientErrorException e) {
+            LOG.log(Level.SEVERE, "ErrorServerException");
+            alert = new Alert(AlertType.ERROR);
+            alert.setTitle("Producto");
+            alert.setHeaderText("Imposible conectar. Inténtelo más tarde");
+            alert.showAndWait();
         }
     }
 
@@ -721,7 +783,12 @@ public class InicioVendedorProductoController {
             producto.setPrecio(precio);
             productoMI.edit(producto);
             getAllProductos();
-        } catch (Exception e) {
+        } catch (ErrorServerException | ProductoExistenteException | ClientErrorException e) {
+            LOG.log(Level.SEVERE, "ErrorServerException");
+            alert = new Alert(AlertType.ERROR);
+            alert.setTitle("Producto");
+            alert.setHeaderText("Imposible conectar. Inténtelo más tarde");
+            alert.showAndWait();
         }
     }
 
@@ -770,8 +837,12 @@ public class InicioVendedorProductoController {
             producto.setDescripcion(descripcion);
             productoMI.edit(producto);
             getAllProductos();
-        } catch (Exception e) {
-
+        } catch (ErrorServerException | ProductoExistenteException | ClientErrorException e) {
+            LOG.log(Level.SEVERE, "ErrorServerException");
+            alert = new Alert(AlertType.ERROR);
+            alert.setTitle("Producto");
+            alert.setHeaderText("Imposible conectar. Inténtelo más tarde");
+            alert.showAndWait();
         }
     }
 
@@ -848,8 +919,13 @@ public class InicioVendedorProductoController {
             producto.setDisponibilidad(date);
             productoMI.edit(producto);
             getAllProductos();
-        } catch (Exception e) {
-            LOG.log(Level.INFO, "Beginning actualizandoDisponibilidad::Exception");
+        } catch (ErrorServerException | ProductoExistenteException | ClientErrorException e) {
+            LOG.log(Level.SEVERE, "ErrorServerException");
+            alert = new Alert(AlertType.ERROR);
+            alert.setTitle("Administrador");
+            alert.setHeaderText("Imposible conectar. Inténtelo más tarde");
+            alert.showAndWait();
+
         }
     }
 
@@ -885,7 +961,7 @@ public class InicioVendedorProductoController {
                         btnBorrar.setDisable(true);
                     }
                 });
-        // tvProductos.refresh();
+
     }
 
     /**
@@ -982,8 +1058,12 @@ public class InicioVendedorProductoController {
         LOG.log(Level.INFO, "Beginning InicioAdministradorProductoController::actualizandoProveedor");
         try {
             productoMI.edit(producto);
-        } catch (Exception e) {
-            LOG.log(Level.INFO, "Beginning actualizandoProveedor::Exception");
+        } catch (ErrorServerException | ProductoExistenteException | ClientErrorException e) {
+            LOG.log(Level.SEVERE, "ErrorServerException");
+            alert = new Alert(AlertType.ERROR);
+            alert.setTitle("Producto");
+            alert.setHeaderText("Imposible conectar. Inténtelo más tarde");
+            alert.showAndWait();
         }
 
     }
@@ -998,10 +1078,7 @@ public class InicioVendedorProductoController {
     private boolean estaReservado(ObservableList<Reserva> reservas, Long id) {
 
         for (Reserva r : reservas) {
-            System.out.println(id + " buscandooo");
-            System.out.println(r.getProducto().getId() + " servidor");
             if (r.getProducto().getId().equals(id)) {
-                System.out.println(r.getProducto().getId() + " entroo");
                 return true;
             }
         }
@@ -1016,8 +1093,14 @@ public class InicioVendedorProductoController {
 
             productoMI.remove(productoSelecionado.getId().toString());
             getAllProductos();
-        } catch (Exception e) {
+        } catch (ErrorBDException | ErrorServerException | ClientErrorException e) {
 
+        } catch (ConnectException ex) {
+            LOG.log(Level.SEVERE, "ErrorServerException");
+            alert = new Alert(AlertType.ERROR);
+            alert.setTitle("Producto");
+            alert.setHeaderText("Imposible conectar. Inténtelo más tarde");
+            alert.showAndWait();
         }
     }
 
@@ -1035,13 +1118,16 @@ public class InicioVendedorProductoController {
             for (Reserva r : reservas) {
                 if (r.getProducto().getId().equals(productoSelecionado.getId())) {
                     reservaMI.remove(r.getId().toString());
-                    System.out.println("borrando ");
+                  
                 }
             }
-            tvProductos.refresh();
 
-        } catch (Exception e) {
-
+        } catch (ErrorServerException e) {
+            LOG.log(Level.SEVERE, "ErrorServerException");
+            alert = new Alert(AlertType.ERROR);
+            alert.setTitle("Producto");
+            alert.setHeaderText("Imposible conectar. Inténtelo más tarde");
+            alert.showAndWait();
         }
     }
 
@@ -1056,10 +1142,20 @@ public class InicioVendedorProductoController {
         try {
             ObservableList<Vendedor> vendedoresServidor = FXCollections.observableArrayList(vendedorMI.findAllVendedores());
             for (Vendedor v : vendedoresServidor) {
-                v.getProductos().remove(productoSelecionado);
-                vendedorMI.edit(v);
+                for (Producto p : v.getProductos()) {
+                    if (p.getId().equals(productoSelecionado.getId())) {
+
+                        v.getProductos().remove(productoSelecionado);
+                        vendedorMI.edit(v);
+                    }
+                }
             }
-        } catch (Exception e) {
+        } catch (ErrorServerException e) {
+            LOG.log(Level.SEVERE, "ErrorServerException");
+            alert = new Alert(AlertType.ERROR);
+            alert.setTitle("Producto");
+            alert.setHeaderText("Imposible conectar. Inténtelo más tarde");
+            alert.showAndWait();
 
         }
     }

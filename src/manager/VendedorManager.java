@@ -5,6 +5,7 @@
  */
 package manager;
 
+import exceptions.ErrorServerException;
 import java.util.List;
 import javax.ws.rs.ClientErrorException;
 import modelo.Proveedor;
@@ -17,19 +18,19 @@ import modelo.Vendedor;
  */
 public interface VendedorManager {
 
-    public void edit(Vendedor vendedor) throws ClientErrorException;
+    public void edit(Vendedor vendedor) throws ErrorServerException;
 
-    public Vendedor find(String id) throws ClientErrorException;
+    public Vendedor find(String id) throws ErrorServerException;
 
-    public void create(Vendedor vendedor) throws ClientErrorException;
+    public void create(Vendedor vendedor) throws ErrorServerException;
 
-    public List<Reserva> findAllReservas() throws ClientErrorException;
+    public List<Reserva> findAllReservas() throws ErrorServerException;
 
-    public List<Proveedor> getProveedoresProducto() throws ClientErrorException;
+    public List<Proveedor> getProveedoresProducto() throws ErrorServerException;
 
-    public List<Vendedor> findAllVendedores() throws ClientErrorException;
+    public List<Vendedor> findAllVendedores() throws ErrorServerException;
 
-    public void remove(String id) throws ClientErrorException;
+    public void remove(String id) throws ErrorServerException;
 
     public void close();
 

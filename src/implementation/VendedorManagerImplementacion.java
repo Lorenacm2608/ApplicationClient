@@ -6,6 +6,7 @@
 package implementation;
 
 import client.VendedorRESTClient;
+import exceptions.ErrorServerException;
 import java.util.List;
 import java.util.logging.Logger;
 import javax.ws.rs.ClientErrorException;
@@ -29,12 +30,13 @@ public class VendedorManagerImplementacion implements VendedorManager {
     }
 
     @Override
-    public void edit(Vendedor vendedor) throws ClientErrorException {
+    public void edit(Vendedor vendedor) throws ErrorServerException {
         try {
             webClient.edit(vendedor);
 
-        } catch (Exception e) {
-
+        } catch (ClientErrorException e) {
+            LOGGER.severe("VendedorManagerImplementacion: edit " + e.getMessage());
+            throw new ErrorServerException();
         }
 
     }
@@ -50,52 +52,53 @@ public class VendedorManagerImplementacion implements VendedorManager {
     }
 
     @Override
-    public List<Reserva> findAllReservas() throws ClientErrorException {
+    public List<Reserva> findAllReservas() throws ErrorServerException {
         List<Reserva> reservas = null;
         try {
             reservas = webClient.findAllReservas(new GenericType<List<Reserva>>() {
             });
 
-        } catch (Exception e) {
-            LOGGER.severe("findAllReservas:" + e.getMessage());
+        } catch (ClientErrorException e) {
+            LOGGER.severe("VendedorManagerImplementacion: findAllReservas " + e.getMessage());
+            throw new ErrorServerException();
         }
         return reservas;
     }
 
     @Override
-    public List<Proveedor> getProveedoresProducto() throws ClientErrorException {
+    public List<Proveedor> getProveedoresProducto() throws ErrorServerException {
         List<Proveedor> proveedores = null;
         try {
             proveedores = webClient.getProveedoresProducto(new GenericType<List<Proveedor>>() {
             });
-            for (Proveedor p : proveedores) {
-                System.out.println(p.toString());
-            }
-        } catch (Exception e) {
-            LOGGER.severe("getProveedoresProducto:" + e.getMessage());
+        } catch (ClientErrorException e) {
+            LOGGER.severe("VendedorManagerImplementacion: getProveedoresProducto " + e.getMessage());
+            throw new ErrorServerException();
         }
         return proveedores;
     }
 
     @Override
-    public List<Vendedor> findAllVendedores() throws ClientErrorException {
+    public List<Vendedor> findAllVendedores() throws ErrorServerException {
         List<Vendedor> vendedores = null;
         try {
             vendedores = webClient.findAllVendedores(new GenericType<List<Vendedor>>() {
             });
 
-        } catch (Exception e) {
-            LOGGER.severe("findAllVendedores:" + e.getMessage());
+        } catch (ClientErrorException e) {
+            LOGGER.severe("VendedorManagerImplementacion: findAllVendedores " + e.getMessage());
+            throw new ErrorServerException();
         }
         return vendedores;
     }
 
     @Override
-    public void remove(String id) throws ClientErrorException {
+    public void remove(String id) throws ErrorServerException {
         try {
             webClient.remove(id);
-        } catch (Exception e) {
-
+        } catch (ClientErrorException e) {
+            LOGGER.severe("UsuarioManagerImplmentation: find " + e.getMessage());
+            throw new ErrorServerException();
         }
 
     }
