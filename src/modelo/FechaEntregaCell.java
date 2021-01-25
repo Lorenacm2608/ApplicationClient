@@ -13,6 +13,7 @@ import java.time.format.FormatStyle;
 import java.util.Date;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
 
 /**
  *
@@ -51,13 +52,13 @@ public class FechaEntregaCell extends TableCell<Reserva, Date> {
         if (empty) {
             setText(null);
             setGraphic(null);
-            System.out.println("Estoy Aqui 1");
+            
             
 
         } else {
            if (isEditing()) {
                 if (fecha != null) {
-                    System.out.println("Estoy Aqui 2");
+                    
 
                     fecha.setValue(getDate());
                 }
@@ -65,7 +66,7 @@ public class FechaEntregaCell extends TableCell<Reserva, Date> {
                 setGraphic(fecha);
             } else {
                 
-                System.out.println("Estoy Aqui 4");
+                
                 /*   if (LocalDate.now().isAfter(getDate())) {
                         fecha.setDisable(true);
                         System.out.println("Estoy Aqui 3");

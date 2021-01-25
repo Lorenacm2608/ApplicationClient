@@ -9,7 +9,7 @@ import java.util.ResourceBundle;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
-import manager.ProductoManager;
+import javax.ws.rs.core.GenericType;
 
 /**
  * Jersey REST client generated for REST resource:ProductoFacadeREST
@@ -24,11 +24,11 @@ import manager.ProductoManager;
  *
  * @author Fredy
  */
-public class ProductoRESTClient implements ProductoManager {
+public class ProductoRESTClient  {
 
-    private WebTarget webTarget;
-    private Client client;
-    private ResourceBundle rb = ResourceBundle.getBundle("config.parametros");
+    private final WebTarget webTarget;
+    private final Client client;
+    private final ResourceBundle rb = ResourceBundle.getBundle("config.parametros");
     private final String BASE_URI = rb.getString("RESTful.baseURI");
 
     public ProductoRESTClient() {
@@ -46,7 +46,8 @@ public class ProductoRESTClient implements ProductoManager {
         webTarget.request(javax.ws.rs.core.MediaType.APPLICATION_XML).put(javax.ws.rs.client.Entity.entity(requestEntity, javax.ws.rs.core.MediaType.APPLICATION_XML));
     }
 
-    public <T> T findAllProductosAsc(Class<T> responseType) throws ClientErrorException {
+   
+    public <T> T findAllProductosAsc(GenericType<T> responseType) throws ClientErrorException {
         WebTarget resource = webTarget;
         resource = resource.path("findAllProductosAsc");
         return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);

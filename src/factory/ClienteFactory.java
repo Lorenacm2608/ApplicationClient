@@ -5,6 +5,7 @@
  */
 package factory;
 
+import implementation.ClienteImplementation;
 import manager.ClienteManager;
 import client.ClienteRESTClient;
 
@@ -13,7 +14,7 @@ import client.ClienteRESTClient;
  * @author 2dam
  */
 public class ClienteFactory {
-    public ClienteManager getClienteRESTClient (){
-        return new ClienteRESTClient();
+    public ClienteManager getClienteImplementation (){
+        return new ClienteImplementation();
     }
 }

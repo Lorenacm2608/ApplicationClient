@@ -6,6 +6,7 @@
 package modelo;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.Set;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -39,7 +40,8 @@ public class Proveedor implements Serializable {
     private String telefono;
     //descripcion del proveedor
     private String descripcion;
-
+    //Fecha alta del proveedor
+    private Date fechaAlta;
     //administrador encargado del proveedor
     private Administrador administrador;
 
@@ -59,7 +61,7 @@ public class Proveedor implements Serializable {
     }
 
     public Proveedor() {
-       
+
     }
 
     /**
@@ -225,4 +227,14 @@ public class Proveedor implements Serializable {
     public void setNombre(String nombre) {
         this.nombre = nombre;
     }
+
+    public Date getFechaAlta() {
+        return fechaAlta;
+    }
+
+    public void setFechaAlta(Date fechaAlta) {
+        this.fechaAlta = fechaAlta;
+    }
+    
+    
 }

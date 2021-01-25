@@ -5,20 +5,27 @@
  */
 package manager;
 
+import exceptions.ErrorBDException;
+import exceptions.ErrorServerException;
+import exceptions.InsertException;
+import exceptions.UpdateException;
+import exceptions.VendedorNotFoundException;
+import exceptions.VendedorYaExisteException;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.client.WebTarget;
+import modelo.Vendedor;
 
 /**
  *
- * @author 2dam
+ * @author Moroni
  */
 public interface VendedorManager {
 
-    public void edit(Object requestEntity) throws ClientErrorException;
+    public void edit(Vendedor vendedor) throws ClientErrorException, UpdateException, ErrorBDException, ErrorServerException, VendedorNotFoundException;
 
     public <T> T find(Class<T> responseType, String id) throws ClientErrorException;
 
-    public void create(Object requestEntity) throws ClientErrorException;
+    public void create(Vendedor vendedor) throws ClientErrorException, InsertException, VendedorYaExisteException, ErrorBDException, ErrorServerException;
 
     public <T> T findAllReservas(Class<T> responseType) throws ClientErrorException;
 

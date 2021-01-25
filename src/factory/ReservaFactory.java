@@ -5,6 +5,7 @@
  */
 package factory;
 
+import implementacion.ReservaImplementation;
 import client.ReservaRESTClient;
 import manager.ReservaManager;
 
@@ -13,8 +14,8 @@ import manager.ReservaManager;
  * @author 2dam
  */
 public class ReservaFactory {
-    public ReservaManager getReservaRESTClient (){
-        return new ReservaRESTClient();
+    public ReservaManager getReservaImplementation (){
+        return new ReservaImplementation();
     }
     
 }

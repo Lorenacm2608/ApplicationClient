@@ -2,12 +2,13 @@ package exceptions;
 /**
  *
  * @author Lorena Cáceres Manuel
+ * 
  */
-public class UsuarioNoEncontradoException extends Exception {
+public class UsuarioNotFoundException extends Exception {
     /**
      * Excepcion de usuario introducido no encontrado
      */
-    public UsuarioNoEncontradoException(){
+    public UsuarioNotFoundException(){
         super("El usuario introducido no se ha encontrado");
     }
 }

@@ -5,15 +5,14 @@
  */
 package factory;
 
-import manager.AdministradorManager;
-import client.AdministradorRESTClient;
+import implementation.AdministradorManagerImplementation;
 
 /**
  *
  * @author 2dam
  */
 public class AdministradorFactory {
-    public AdministradorManager getAdministradorRESTClient (){
-        return new AdministradorRESTClient();
+    public AdministradorManagerImplementation getAdministradorManagerImplementation (){
+        return new AdministradorManagerImplementation();
     }
 }

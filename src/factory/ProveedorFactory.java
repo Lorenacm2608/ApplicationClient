@@ -5,15 +5,14 @@
  */
 package factory;
 
-import manager.ProveedorManager;
-import client.ProveedorRESTClient;
+import implementation.ProveedorManagerImplementation;
 
 /**
  *
- * @author 2dam
+ * @author Lorena Cáceres Manuel
  */
 public class ProveedorFactory {
-    public ProveedorManager getProveedorRESTClient (){
-        return new ProveedorRESTClient();
+    public ProveedorManagerImplementation getProveedorManagerImplementation (){
+        return new ProveedorManagerImplementation();
     }
 }

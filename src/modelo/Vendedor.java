@@ -7,6 +7,7 @@ import javax.xml.bind.annotation.XmlTransient;
 
 /*
  * Entidad Vendedor relacionado con gestiona Producto y maneja Reserva
+ * @author Moroni
  */
 @XmlRootElement
 public class Vendedor extends Usuario implements Serializable {

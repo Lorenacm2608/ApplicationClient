@@ -13,6 +13,7 @@
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
@@ -39,16 +40,15 @@
             </Button>
          </children>
       </VBox>
-      <TableView fx:id="tbProveedor" layoutX="31.0" layoutY="121.0" prefHeight="541.0" prefWidth="962.0">
+      <TableView fx:id="tbProveedor" layoutX="31.0" layoutY="121.0" prefHeight="541.0" prefWidth="977.0">
         <columns>
-          <TableColumn fx:id="tcId" prefWidth="120.0" text="Id" />
-          <TableColumn fx:id="tcNombre" prefWidth="120.0" text="Nombre" />
-            <TableColumn fx:id="tcTipo" prefWidth="120.0" text="Tipo" />
-            <TableColumn fx:id="tcEmpresa" prefWidth="120.0" text="Empresa" />
-            <TableColumn fx:id="tcEmail" prefWidth="120.0" text="Email" />
-            <TableColumn fx:id="tcTelefono" prefWidth="120.0" text="Telefono" />
-            <TableColumn fx:id="tcDescripcion" prefWidth="120.0" text="Descripción" />
-            <TableColumn fx:id="tcAdmin" prefWidth="120.0" text="Admin" />
+          <TableColumn fx:id="tcNombre" prefWidth="140.0" text="Nombre" />
+            <TableColumn fx:id="tcTipo" prefWidth="140.0" text="Tipo" />
+            <TableColumn fx:id="tcEmpresa" prefWidth="140.0" text="Empresa" />
+            <TableColumn fx:id="tcEmail" prefWidth="140.0" text="Email" />
+            <TableColumn fx:id="tcTelefono" prefWidth="140.0" text="Telefono" />
+            <TableColumn fx:id="tcDescripcion" prefWidth="140.0" text="Descripción" />
+            <TableColumn fx:id="tcFechaAlta" prefWidth="140.0" text="Fecha Alta" />
         </columns>
       </TableView>
       <HBox fx:id="Hbox" prefHeight="31.0" prefWidth="1253.0">
@@ -57,7 +57,6 @@
               <menus>
                 <Menu fx:id="menuPerfil" mnemonicParsing="false" text="Perfil">
                   <items>
-                    <MenuItem fx:id="menuAdministrador" mnemonicParsing="false" onAction="#configMenuAdministrador" text="Administrador" />
                         <MenuItem fx:id="menuSalir" mnemonicParsing="false" onAction="#configMenuSalir" text="Salir" />
                   </items>
                 </Menu>
@@ -71,6 +70,5 @@
          </children>
       </HBox>
       <TextField fx:id="tfBuscar" layoutX="31.0" layoutY="81.0" prefHeight="31.0" prefWidth="165.0" promptText="Buscar proveedor" />
-      <Button fx:id="btnBuscar" layoutX="209.0" layoutY="81.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="84.0" text="Buscar" />
    </children>
 </Pane>

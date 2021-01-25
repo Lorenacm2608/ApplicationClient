@@ -5,7 +5,17 @@
  */
 package manager;
 
+import exceptions.DeleteException;
+import exceptions.ErrorBDException;
+import exceptions.ErrorServerException;
+import exceptions.InsertException;
+import exceptions.ProductoNotFoundException;
+import exceptions.ProveedorNotFoundException;
+import exceptions.ProveedorYaExisteException;
+import exceptions.SelectException;
+import exceptions.UpdateException;
 import javax.ws.rs.ClientErrorException;
+import modelo.Proveedor;
 
 /**
  *
@@ -13,15 +23,15 @@ import javax.ws.rs.ClientErrorException;
  */
 public interface ProveedorManager {
 
-    public void edit(Object requestEntity) throws ClientErrorException;
+    public void edit(Proveedor proveedor) throws ClientErrorException, ErrorBDException, ErrorServerException ;
 
-    public <T> T find(Class<T> responseType, String id) throws ClientErrorException;
+    public Proveedor find(Proveedor proveedor, String id) throws ClientErrorException, ProveedorNotFoundException, ErrorBDException, ErrorServerException;
 
-    public <T> T getProductos(Class<T> responseType, String id) throws ClientErrorException;
+    public Proveedor getProductos(Proveedor proveedor, String id) throws ErrorBDException, ErrorServerException, ProductoNotFoundException;
 
-    public void create(Object requestEntity) throws ClientErrorException;
+    public void create(Proveedor proveedor) throws ClientErrorException, ProveedorYaExisteException, ErrorBDException, ErrorServerException;
 
-    public void remove(String id) throws ClientErrorException;
+    public void remove(String id) throws ClientErrorException, ErrorBDException, ErrorServerException;
 
     public void close();
 

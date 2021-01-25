@@ -24,7 +24,7 @@ import manager.ProveedorManager;
  *
  * @author Fredy
  */
-public class ProveedorRESTClient implements ProveedorManager {
+public class ProveedorRESTClient {
 
     private WebTarget webTarget;
     private Client client;

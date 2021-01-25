@@ -2,6 +2,7 @@ package exceptions;
 /**
  *
  * @author Lorena Cáceres Manuel
+ * 
  */
 public class ErrorBDException extends Exception  {
     /**

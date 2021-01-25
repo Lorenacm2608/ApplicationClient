@@ -3,12 +3,13 @@ package exceptions;
 /**
  *
  * @author Lorena Cáceres Manuel
+ * 
  */
-public class EmailExistenteException extends Exception {
+public class EmailYaExisteException extends Exception {
     /**
      * Excepcion de email en uso
      */
-    public  EmailExistenteException(){
+    public  EmailYaExisteException(){
     super("Email en uso");
 }
 }

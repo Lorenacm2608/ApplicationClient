@@ -5,15 +5,14 @@
  */
 package factory;
 
-import manager.UsuarioManager;
-import client.UsuarioRESTClient;
+import implementation.UsuarioManagerImplementation;
 
 /**
  *
- * @author 2dam
+ * @author Lorena Cáceres Manuel
  */
 public class UsuarioFactory {
-    public UsuarioManager  getUsuarioRESTClient (){
-        return new UsuarioRESTClient();
+    public UsuarioManagerImplementation getUsuarioManagerImplementation() {
+        return new UsuarioManagerImplementation();
     }
 }

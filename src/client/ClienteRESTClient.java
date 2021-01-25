@@ -5,11 +5,14 @@
  */
 package client;
 
+import java.util.List;
 import java.util.ResourceBundle;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.GenericType;
 import manager.ClienteManager;
+import modelo.Cliente;
 
 /**
  * Jersey REST client generated for REST resource:ClienteFacadeREST
@@ -24,7 +27,7 @@ import manager.ClienteManager;
  *
  * @author Fredy
  */
-public class ClienteRESTClient implements ClienteManager {
+public class ClienteRESTClient  {
 
     private WebTarget webTarget;
     private Client client;
@@ -68,6 +71,12 @@ public class ClienteRESTClient implements ClienteManager {
 
     public void close() {
         client.close();
+    }
+
+    public <T> T findCliente(GenericType<T> responseType) throws ClientErrorException {
+        WebTarget resource = webTarget;
+        resource = resource.path("findCliente");
+        return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
     }
 
 }

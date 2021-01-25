@@ -1,12 +1,10 @@
 package modelo;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
 import java.util.Date;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
  * Esta clase se encargará sobre la gestión de reservas

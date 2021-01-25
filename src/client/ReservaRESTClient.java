@@ -5,14 +5,17 @@
  */
 package client;
 
+import exceptions.ErrorBDException;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
 import static javafx.scene.input.KeyCode.T;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.GenericType;
 import manager.ReservaManager;
+import modelo.Proveedor;
 import modelo.Reserva;
 
 /**
@@ -28,7 +31,7 @@ import modelo.Reserva;
  *
  * @author Fredy
  */
-public class ReservaRESTClient implements ReservaManager {
+public class ReservaRESTClient  {
 
     private WebTarget webTarget;
     private Client client;
@@ -45,7 +48,7 @@ public class ReservaRESTClient implements ReservaManager {
         resource = resource.path("findReservasCanceladas");
         return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
     }
-
+    
     public void edit(Object requestEntity) throws ClientErrorException {
         webTarget.request(javax.ws.rs.core.MediaType.APPLICATION_XML).put(javax.ws.rs.client.Entity.entity(requestEntity, javax.ws.rs.core.MediaType.APPLICATION_XML));
     }
@@ -56,27 +59,16 @@ public class ReservaRESTClient implements ReservaManager {
         return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
     }
     //igual quitar las Ts y poner List <Reservas>   y luego en el generic quitar la <T> y tambien el return, return list<Reservas>
-    public List <Reserva> findReservas(GenericType responseType) throws ClientErrorException {
+    public <T> T findReservas(GenericType<T> responseType) throws ClientErrorException {
         WebTarget resource = webTarget;
         resource = resource.path("findReservas");
-        return (List <Reserva>) resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
-    }
-    /*
-    public  <T> T Eliminar(Class<T> responseType) throws ClientErrorException {
-        WebTarget resource = webTarget;
-        resource = resource.path("DeleteReservas");
         return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
-    }*/
-    
+    }
     
     public <T> T find(Class<T> responseType, String id) throws ClientErrorException {
         WebTarget resource = webTarget;
         resource = resource.path(java.text.MessageFormat.format("{0}", new Object[]{id}));
         return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
-    }
-
-    public void create(Object requestEntity) throws ClientErrorException {
-        webTarget.request(javax.ws.rs.core.MediaType.APPLICATION_XML).post(javax.ws.rs.client.Entity.entity(requestEntity, javax.ws.rs.core.MediaType.APPLICATION_XML));
     }
 
     public <T> T findReservasRealizadas(Class<T> responseType) throws ClientErrorException {
@@ -85,20 +77,15 @@ public class ReservaRESTClient implements ReservaManager {
         return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
     }
 
+    public void create(Object requestEntity) throws ClientErrorException {
+        webTarget.request(javax.ws.rs.core.MediaType.APPLICATION_XML).post(javax.ws.rs.client.Entity.entity(requestEntity, javax.ws.rs.core.MediaType.APPLICATION_XML));
+    }
     public void remove(String id) throws ClientErrorException {
         webTarget.path(java.text.MessageFormat.format("{0}", new Object[]{id})).request().delete();
     }
-    
 
     public void close() {
         client.close();
-    }
-
-   
-    public <T> T Eliminar(Class<T> responseType, String id) throws ClientErrorException {
-      WebTarget resource = webTarget;
-        resource = resource.path("DeleteReservas");
-        return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
     }
 
 }

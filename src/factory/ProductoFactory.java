@@ -5,6 +5,7 @@
  */
 package factory;
 
+import implementation.ProductoManagerImplementation;
 import manager.ProductoManager;
 import client.ProductoRESTClient;
 
@@ -13,7 +14,7 @@ import client.ProductoRESTClient;
  * @author 2dam
  */
 public class ProductoFactory {
-    public ProductoManager getProductoRESTClient (){
-        return new ProductoRESTClient();
+    public ProductoManager getProductoManagerImplementation (){
+        return new ProductoManagerImplementation();
     }
 }

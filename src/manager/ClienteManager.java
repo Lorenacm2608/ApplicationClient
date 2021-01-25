@@ -5,8 +5,10 @@
  */
 package manager;
 
+import java.util.List;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.client.WebTarget;
+import modelo.Cliente;
 
 /**
  *
@@ -14,11 +16,14 @@ import javax.ws.rs.client.WebTarget;
  */
 public interface ClienteManager {
 
-    public void edit(Object requestEntity) throws ClientErrorException;
+    
+    public void edit(Cliente cliente) throws ClientErrorException;
 
     public <T> T findAllProductosAsc(Class<T> responseType) throws ClientErrorException;
 
     public <T> T find(Class<T> responseType, String id) throws ClientErrorException;
+    
+    public List<Cliente> findCliente() throws ClientErrorException;
 
     public <T> T findReserva(Class<T> responseType, String id) throws ClientErrorException;
 

@@ -1,6 +1,7 @@
 package modelo;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.Set;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -50,6 +51,26 @@ public class Producto implements Serializable {
 
    
     private String modelo;
+    
+    private Date disponibilidad;
+    
+    /**
+     * Devuelve la fecha de disponibilidad
+     * @return 
+     */
+
+    public Date getDisponibilidad() {
+        return disponibilidad;
+    }
+    /**
+     * Inserta la fecha de disponibilidad
+     * @param disponibilidad 
+     */
+
+    public void setDisponibilidad(Date disponibilidad) {
+        this.disponibilidad = disponibilidad;
+    }
+    
 
     /**
      * Relación con la entidad Reserva
@@ -308,7 +329,7 @@ public class Producto implements Serializable {
      */
     @Override
     public String toString() {
-        return  modelo;
+        return "flyshoes.entity.Producto[ id=" + id + " ]";
     }
 
 }

@@ -10,5 +10,5 @@ package modelo;
  * @author Lorena
  */
 public enum TipoProducto {
-    ZAPATILLAS, ROPA;
+    ZAPATILLAS, ROPA, AMBAS;
 }

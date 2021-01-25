@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Menu?>
@@ -8,63 +7,52 @@
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<Pane fx:id="pnInicioAdminVend" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="509.0" prefWidth="832.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.InicioAdministradorVendedorController">
+<Pane fx:id="pnInicioAdminVend" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="1253.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.InicioAdministradorVendedorController">
    <children>
-      <Label fx:id="lblVendedor" alignment="CENTER" layoutX="46.0" layoutY="42.0" prefHeight="36.0" prefWidth="549.0" text="FlyShoes Vendedores">
+      <Label fx:id="lblVendedor" alignment="CENTER" layoutX="329.0" layoutY="33.0" prefHeight="36.0" prefWidth="549.0" text="FlyShoes Vendedores">
          <font>
             <Font size="25.0" />
          </font>
       </Label>
-      <VBox fx:id="Vbox" layoutX="603.0" layoutY="33.0" prefHeight="475.0" prefWidth="229.0">
-         <children>
-            <Button fx:id="btnAltaVendedor" mnemonicParsing="false" prefHeight="31.0" prefWidth="165.0" text="Nuevo ">
-               <VBox.margin>
-                  <Insets left="35.0" top="70.0" />
-               </VBox.margin>
-            </Button>
-            <Button fx:id="btnBorrarVendedor" mnemonicParsing="false" prefHeight="31.0" prefWidth="165.0" text="Borrar ">
-               <VBox.margin>
-                  <Insets left="35.0" top="70.0" />
-               </VBox.margin>
-            </Button>
-            <Button fx:id="btnActualizarVendedor" mnemonicParsing="false" prefHeight="31.0" prefWidth="165.0" text="Actualizar ">
-               <VBox.margin>
-                  <Insets left="35.0" top="70.0" />
-               </VBox.margin>
-            </Button>
-         </children>
-      </VBox>
-      <MenuBar fx:id="menuBar" layoutY="-2.0" prefHeight="32.0" prefWidth="832.0">
+      <VBox fx:id="Vbox" layoutX="999.0" layoutY="124.0" prefHeight="475.0" prefWidth="229.0" />
+      <MenuBar fx:id="menuBar" layoutY="-2.0" prefHeight="32.0" prefWidth="1253.0">
         <menus>
           <Menu fx:id="menuPerfil" mnemonicParsing="false" text="Perfil">
             <items>
-              <MenuItem fx:id="menuAdministrador" mnemonicParsing="false" text="Administrador" />
-                  <MenuItem fx:id="menuSalir" mnemonicParsing="false" text="Salir" />
+              <MenuItem fx:id="menuAdministrador" mnemonicParsing="false" text="Administrador" onAction="#configMenuAdministrador"/>
+                  <MenuItem fx:id="menuSalir" mnemonicParsing="false" text="Salir" onAction="#configMenuSalir"/>
             </items>
           </Menu>
           <Menu fx:id="menuProveedor" mnemonicParsing="false" text="Proveedor">
             <items>
-              <MenuItem fx:id="menuProveedores" mnemonicParsing="false" text="Lista de proveedores" />
+              <MenuItem fx:id="menuProveedores" mnemonicParsing="false" text="Lista de proveedores" onAction="#configMenuProveedores"/>
             </items>
           </Menu>
         </menus>
       </MenuBar>
-      <TableView fx:id="tbVendedores" layoutX="46.0" layoutY="94.0" prefHeight="384.0" prefWidth="549.0">
+      <TableView fx:id="tbVendedores" layoutX="65.0" layoutY="124.0" prefHeight="498.0" prefWidth="826.0">
         <columns>
-          <TableColumn fx:id="colUsuario" prefWidth="54.0" text="Usuario" />
-          <TableColumn fx:id="colEmail" prefWidth="47.0" text="Email" />
-            <TableColumn fx:id="colNombre" prefWidth="72.0" text="Nombre" />
-            <TableColumn fx:id="colEstado" prefWidth="63.0" text="Estado" />
-            <TableColumn fx:id="colUltimoAcceso" prefWidth="88.0" text="Ultimo acceso" />
-            <TableColumn fx:id="colDni" prefWidth="56.0" text="DNI" />
-            <TableColumn fx:id="colDireccion" prefWidth="71.0" text="Direccion" />
-            <TableColumn fx:id="colTienda" prefWidth="45.0" text="Tienda" />
-            <TableColumn fx:id="colSalario" prefWidth="76.0" text="Salario" />
+          <TableColumn fx:id="colUsuario" prefWidth="68.0" text="Usuario" />
+            <TableColumn fx:id="colEmail" prefWidth="54.0" text="Email" />
+            <TableColumn fx:id="colNombre" prefWidth="73.0" text="Nombre" />
+            <TableColumn fx:id="colEstado" prefWidth="65.0" text="Estado" />
+            <TableColumn fx:id="colUltimoAcceso" prefWidth="91.0" text="Ultimo acceso" />
+            <TableColumn fx:id="colUltimaContrasenia" prefWidth="109.0" text="Ultima contraseña" />
+            <TableColumn fx:id="colDireccion" prefWidth="78.0" text="Direccion" />
+            <TableColumn fx:id="colTelefono" prefWidth="66.0" text="Telefono" />
+            <TableColumn fx:id="colDni" prefWidth="81.0" text="Dni" />
+            <TableColumn fx:id="colSalario" prefWidth="50.0" text="Salario" />
+            <TableColumn fx:id="colTienda" prefWidth="90.0" text="Tienda" />
         </columns>
       </TableView>
+      <Button fx:id="btnAltaVendedor" layoutX="1038.0" layoutY="172.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="165.0" text="Nuevo " />
+      <Button fx:id="btnBorrarVendedor" layoutX="1038.0" layoutY="346.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="165.0" text="Borrar " />
+      <TextField fx:id="txtBuscarVendedor" layoutX="65.0" layoutY="80.0" />
+      <Button fx:id="btnBuscar" layoutX="229.0" layoutY="80.0" mnemonicParsing="false" text="Buscar" />
    </children>
 </Pane>

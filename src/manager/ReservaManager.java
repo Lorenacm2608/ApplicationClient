@@ -5,6 +5,7 @@
  */
 package manager;
 
+import exceptions.ErrorBDException;
 import java.util.List;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.client.WebTarget;
@@ -19,21 +20,19 @@ public interface ReservaManager {
 
     public <T> T findReservasCanceladas(Class<T> responseType) throws ClientErrorException;
 
-    public void edit(Object requestEntity) throws ClientErrorException;
+    public void edit(Reserva reserva) throws ClientErrorException;
 
     public <T> T findReservasConfirmadas(Class<T> responseType) throws ClientErrorException;
 
-    public <T> T find(Class<T> responseType, String id) throws ClientErrorException;
+    public Reserva find(Reserva reserva, String id) throws ClientErrorException;
 
-    public void create(Object requestEntity) throws ClientErrorException;
+    public void create(Reserva reserva) throws ClientErrorException;
 
     public <T> T findReservasRealizadas(Class<T> responseType) throws ClientErrorException;
     
-    public List <Reserva> findReservas(GenericType responseType) throws ClientErrorException;
-    /*
-    public <T> T Eliminar(Class<T> responseType, String id) throws ClientErrorException;
-*/
-    public void remove(String id) throws ClientErrorException;
+    public List<Reserva> findReservas() throws ClientErrorException;
+
+    public void remove (String id) throws ClientErrorException;
 
     public void close();
 

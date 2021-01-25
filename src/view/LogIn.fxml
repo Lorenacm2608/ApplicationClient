@@ -10,20 +10,20 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.Pane?>
 
-
-<Pane fx:id="pnPrincipal" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="489.0" prefWidth="404.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.LogInController">
+<Pane fx:id="pnPrincipal" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.LogInController">
     <children>
         <Label fx:id="lblUsuario" layoutX="61.0" layoutY="173.0" prefHeight="17.0" prefWidth="149.0" text="Usuario" />
         <TextField fx:id="txtUsuario" layoutX="61.0" layoutY="202.0" prefHeight="31.0" prefWidth="283.0" />
         <Label fx:id="lblContrasena" layoutX="61.0" layoutY="250.0" prefHeight="17.0" prefWidth="149.0" text="Contraseña" />
         <PasswordField fx:id="txtContrasena" layoutX="61.0" layoutY="282.0" prefHeight="31.0" prefWidth="283.0" />
-        <Button fx:id="btnIniciar" layoutX="303.0" layoutY="414.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="83.0" text="Iniciar " />
-        <Hyperlink fx:id="hlRegistrarse" layoutX="46.0" layoutY="415.0" text="¿Quieres registrarte?  " />
+        <Button fx:id="btnIniciar" layoutX="284.0" layoutY="414.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="83.0" text="Iniciar " />
+        <Hyperlink fx:id="hlRegistrarse" layoutX="45.0" layoutY="415.0" text="¿Quieres registrarte?  " />
       <ImageView fx:id="ivLogo" fitHeight="124.0" fitWidth="248.0" layoutX="77.0" layoutY="24.0">
          <image>
             <Image url="@../../../../logo.png" />
          </image>
       </ImageView>
+      <Hyperlink fx:id="hlContraseniaOlvidada" layoutX="61.0" layoutY="321.0" text="¿Has olvidado tu contraseña?  " />
     </children>
    <opaqueInsets>
       <Insets />
