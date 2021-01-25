@@ -23,7 +23,7 @@ import modelo.Reserva;
  * [reserva]<br>
  * USAGE:
  * <pre>
- *        ReservaRESTClient client = new ReservaRESTClient();
+ *         ReservaRESTClient client = new ReservaRESTClient();
  *        Object response = client.XXX(...);
  *        // do whatever with response
  *        client.close();

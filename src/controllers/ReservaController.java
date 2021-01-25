@@ -73,7 +73,7 @@ import modelo.Usuario;
 /**
  * FXML Controller class
  *
- * @author 2dam
+ * @author Nadir
  */
 public class ReservaController implements Initializable {
     

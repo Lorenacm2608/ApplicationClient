@@ -33,12 +33,13 @@ public class ClienteRESTClient  {
     private Client client;
     private ResourceBundle rb = ResourceBundle.getBundle("config.parametros");
     private final String BASE_URI = rb.getString("RESTful.baseURI");
-
+    
+    
     public ClienteRESTClient() {
         client = javax.ws.rs.client.ClientBuilder.newClient();
         webTarget = client.target(BASE_URI).path("cliente");
     }
-
+    
     public void edit(Object requestEntity) throws ClientErrorException {
         webTarget.request(javax.ws.rs.core.MediaType.APPLICATION_XML).put(javax.ws.rs.client.Entity.entity(requestEntity, javax.ws.rs.core.MediaType.APPLICATION_XML));
     }
@@ -73,7 +74,8 @@ public class ClienteRESTClient  {
         client.close();
     }
 
-    public <T> T findCliente(GenericType<T> responseType) throws ClientErrorException {
+    
+     public <T> T findCliente(GenericType<T> responseType) throws ClientErrorException {
         WebTarget resource = webTarget;
         resource = resource.path("findCliente");
         return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);

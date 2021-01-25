@@ -20,7 +20,7 @@ import modelo.Cliente;
 /**
  * Jersey REST client generated for REST resource:ClienteFacadeREST
  * [cliente]<br>
- * USAGE:
+ *  USAGE:
  * <pre>
  *        ClienteRESTClient client = new ClienteRESTClient();
  *        Object response = client.XXX(...);

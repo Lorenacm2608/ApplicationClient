@@ -14,7 +14,7 @@ import modelo.Producto;
 
 /**
  *
- * @author 2dam
+ *  @author 2dam
  */
 public interface ProductoManager {
 

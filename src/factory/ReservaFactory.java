@@ -11,7 +11,7 @@ import manager.ReservaManager;
 
 /**
  *
- * @author 2dam
+ *  @author 2dam
  */
 public class ReservaFactory {
     public ReservaManager getReservaImplementation (){

@@ -40,7 +40,7 @@
         <menus>
           <Menu fx:id="menuPerfil" mnemonicParsing="false" text="Perfil">
             <items>
-              <MenuItem fx:id="menuSalir" mnemonicParsing="false" onAction="#configMenuSalir" text="Salir" />
+               <MenuItem fx:id="menuSalir" mnemonicParsing="false" onAction="#configMenuSalir" text="Salir" />
             </items>
           </Menu>
           <Menu fx:id="menuAyuda" mnemonicParsing="false" text="Ayuda">

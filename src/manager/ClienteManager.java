@@ -12,7 +12,7 @@ import modelo.Cliente;
 
 /**
  *
- * @author 2dam
+ *   @author 2dam
  */
 public interface ClienteManager {
 

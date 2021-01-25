@@ -18,7 +18,7 @@ import modelo.Reserva;
 
 /**
  *
- * @author Fredy
+ * @author Nadir
  */
 public class ReservaImplementation implements ReservaManager {
 

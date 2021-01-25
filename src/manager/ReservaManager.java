@@ -14,7 +14,7 @@ import modelo.Reserva;
 
 /**
  *
- * @author 2dam
+ *  @author Nadir
  */
 public interface ReservaManager {
 
