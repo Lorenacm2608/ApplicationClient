@@ -46,12 +46,10 @@ public class InicioAdministradorVendedorTest extends ApplicationTest {
     @Test
     public void testA_LoginToInicioAdministradorVendedor() {
         clickOn("#txtUsuario");
-        write("vendedor");
+        write("Administrador1");
         clickOn("#txtContrasena");
-        write("vendedor");
+        write("administrador1");
         clickOn("#btnIniciar");
-        clickOn("#menuVendedor");
-        clickOn("#menuVendedores");
         verifyThat("#pnInicioAdminVend", isVisible());
     }
     
@@ -107,7 +105,7 @@ public class InicioAdministradorVendedorTest extends ApplicationTest {
         press(KeyCode.ENTER).release(KeyCode.ENTER);
         row=lookup(".table-row-cell").nth(0).lookup(".table-cell").nth(7).query();
         doubleClickOn(row);
-        write("999888777");
+        write("123456789");
         press(KeyCode.ENTER).release(KeyCode.ENTER);
         row=lookup(".table-row-cell").nth(0).lookup(".table-cell").nth(8).query();
         doubleClickOn(row);
