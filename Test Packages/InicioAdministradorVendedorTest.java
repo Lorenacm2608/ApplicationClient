@@ -78,10 +78,23 @@ public class InicioAdministradorVendedorTest extends ApplicationTest {
     }
     
     /**
+     * Test que verifica el btnBuscar se desabilita teniendo un dato vacio
+     * y que no se excede de 30 caracteres
+     */
+    @Test
+    public void testD_buscarBoton() {
+        clickOn("#txtBuscarVendedor");
+        write("AlbaAlbaAlbaAlbaAlbaAlbaAlbaAlba");
+        eraseText(32);
+        verifyThat("#btnBuscar", isDisabled());
+
+    }
+    
+    /**
      * Test que verifica el btnAltaVendedor se habilita he introduce datos
      */
     @Test
-    public void testD_altaBoton() {
+    public void testE_altaBoton() {
         clickOn("#btnAltaVendedor");
         Node row=lookup(".table-row-cell").nth(0).lookup(".table-cell").nth(0).query();
         doubleClickOn(row);
@@ -126,7 +139,7 @@ public class InicioAdministradorVendedorTest extends ApplicationTest {
      * Test que verifica el btnBorrarVendedor
      */
     @Test
-    public void testE_borrarBoton() {
+    public void testF_borrarBoton() {
         Node row=lookup(".table-row-cell").nth(0).query();
         assertNotNull("Row is null: table has not that row. ",row);
         clickOn(row);
@@ -139,7 +152,7 @@ public class InicioAdministradorVendedorTest extends ApplicationTest {
      * Test que verifica el menuAdministrador se muestra
      */
     @Test
-    public void testF_administradorMenu() {
+    public void testG_administradorMenu() {
         clickOn("#menuPerfil");
         clickOn("#menuAdministrador");
         clickOn("Aceptar");
@@ -152,7 +165,7 @@ public class InicioAdministradorVendedorTest extends ApplicationTest {
      * en el menu proveedores
      */
     @Test
-    public void testG_proveedoresMenu() {
+    public void testH_proveedoresMenu() {
         clickOn("#menuProveedor");
         clickOn("#menuProveedores");
         clickOn("Aceptar");
@@ -165,7 +178,7 @@ public class InicioAdministradorVendedorTest extends ApplicationTest {
      * en el menu salir
      */
     @Test
-    public void testH_salirMenu() {
+    public void testI_salirMenu() {
         clickOn("#menuPerfil");
         clickOn("#menuSalir");
         clickOn("Aceptar");
